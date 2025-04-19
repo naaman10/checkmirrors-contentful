@@ -67,4 +67,31 @@ export interface TextSection {
   };
 }
 
-export type ContentSectionType = HeroBannerSection | TextSection; 
+export interface FeatureSection {
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: {
+    title: string;
+    bodyText: string;
+    media: {
+      fields: {
+        altText: string;
+        image: Array<{
+          url: string;
+          secure_url: string;
+        }>;
+      };
+    };
+    alignment: 'Left' | 'Right';
+    background: 'Light' | 'Dark';
+    cta?: CTA;
+  };
+}
+
+export type ContentSectionType = HeroBannerSection | TextSection | FeatureSection; 

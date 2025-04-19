@@ -3,7 +3,8 @@
 import { Entry, EntrySkeletonType } from 'contentful';
 import HeroBanner from './HeroBanner';
 import TextSection from './TextSection';
-import { HeroBannerSection as HeroBannerSectionType, TextSection as TextSectionType } from './types';
+import Feature from './Feature';
+import { HeroBannerSection as HeroBannerSectionType, TextSection as TextSectionType, FeatureSection as FeatureSectionType } from './types';
 
 const componentMap = {
   componentHeroBanner: (props: HeroBannerSectionType['fields']) => {
@@ -11,6 +12,7 @@ const componentMap = {
     return <HeroBanner {...props} />;
   },
   text: (props: TextSectionType['fields']) => <TextSection {...props} />,
+  componentFeature: (props: FeatureSectionType['fields']) => <Feature {...props} />,
 };
 
 export default function ContentSection({ section }: { section: Entry<EntrySkeletonType> }) {

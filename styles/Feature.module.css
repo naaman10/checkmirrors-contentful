@@ -1,0 +1,89 @@
+.featureSection {
+  padding: 4rem 0;
+  transition: background-color 0.3s ease;
+}
+
+.lightBg {
+  background-color: #ffffff;
+  color: #333;
+}
+
+.darkBg {
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+.featureContent {
+  padding: 2rem;
+}
+
+.featureContent .title {
+  margin-bottom: 1.5rem;
+}
+
+.featureContent .title h2 {
+  color: inherit;
+  margin-bottom: 0;
+}
+
+.featureContent .title span.title-a {
+  color: #333;
+}
+
+.featureContent .title span.title-b {
+  color: #007bff;
+}
+
+.featureContent p {
+  color: inherit;
+  line-height: 1.6;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+.featureCTA {
+  margin-top: 2rem;
+}
+
+.featureImage {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.featureImage:hover {
+  transform: scale(1.02);
+}
+
+.featureImage img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .featureSection {
+    padding: 2rem 0;
+  }
+
+  .featureContent {
+    padding: 1rem;
+    text-align: center;
+  }
+
+  /* Ensure media is always above text on mobile */
+  .featureImage {
+    margin-bottom: 2rem;
+    order: -1; /* This will force the image to appear first */
+  }
+
+  .featureContent {
+    order: 1; /* This will force the content to appear second */
+  }
+
+  .featureCTA {
+    margin-top: 1.5rem;
+  }
+} 
