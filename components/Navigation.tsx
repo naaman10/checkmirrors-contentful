@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient, Entry, EntrySkeletonType } from 'contentful';
+import CTA from './CTA';
+import { ComponentCtaAction } from './types';
+
+console.log('Navigation component file loaded');
 
 interface NavigationMenuItem {
   sys: {
@@ -33,10 +37,13 @@ interface NavigationData {
   fields: {
     name: string;
     menu: Array<Entry<EntrySkeletonType>>;
+    cta?: ComponentCtaAction;
   };
 }
 
 export default function Navigation() {
+  console.log('Navigation component rendering');
+  
   const [navigationData, setNavigationData] = useState<NavigationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,13 +66,18 @@ export default function Navigation() {
           accessToken: accessToken,
         });
 
-        const entry = await client.getEntry('6QijAygCRrf37WNFdnfXwI', { 
+        const entries = await client.getEntries({
+          content_type: 'componentNavigationMainNavigation',
           include: 3
         });
-        
+
+        if (!entries.items || entries.items.length === 0) {
+          throw new Error('No navigation entries found in Contentful');
+        }
+
+        const entry = entries.items[0];
         setNavigationData(entry as unknown as NavigationData);
 
-        // Fetch subMenuItems for each menu item that has them
         if (entry.fields && typeof entry.fields === 'object' && 'menu' in entry.fields) {
           const menuItems = (entry.fields.menu as Array<Entry<EntrySkeletonType>>).filter(item => 
             item.fields && typeof item.fields === 'object' && 'subMenuItems' in item.fields
@@ -95,6 +107,7 @@ export default function Navigation() {
           }
         }
       } catch (err) {
+        console.error('Navigation Error:', err instanceof Error ? err.message : 'Failed to fetch navigation data');
         setError(err instanceof Error ? err.message : 'Failed to fetch navigation data');
       } finally {
         setLoading(false);
@@ -104,6 +117,14 @@ export default function Navigation() {
     fetchNavigation();
   }, []);
 
+  console.log('Navigation render state:', {
+    loading,
+    error,
+    navigationData: navigationData ? 'Present' : 'Missing',
+    hasCTA: navigationData?.fields?.cta ? 'Yes' : 'No',
+    menuItems: navigationData?.fields?.menu?.length || 0
+  });
+
   const toggleDropdown = (id: string) => {
     setOpenDropdowns((prev) => ({
       ...prev,
@@ -111,60 +132,27 @@ export default function Navigation() {
     }));
   };
 
-  if (loading) return <div>Loading navigation...</div>;
-  if (error) return <div className="alert alert-danger">Error: {error}</div>;
-  if (!navigationData) return null;
-  if (!navigationData.fields?.menu) return <div>No navigation items found</div>;
+  if (loading) {
+    console.log('Navigation is loading...');
+    return <div>Loading navigation...</div>;
+  }
+  if (error) {
+    console.log('Navigation error:', error);
+    return <div className="alert alert-danger">Error: {error}</div>;
+  }
+  if (!navigationData) {
+    console.log('No navigation data available');
+    return null;
+  }
+  if (!navigationData.fields?.menu) {
+    console.log('No menu items found in navigation data');
+    return <div>No navigation items found</div>;
+  }
 
-  // Filter and sort menu items
-  const sortedMenuItems = (navigationData.fields.menu as Array<Entry<EntrySkeletonType>>)
-    .filter((item): item is Entry<EntrySkeletonType> => 
-      item.fields && typeof item.fields === 'object' && 'label' in item.fields
-    )
-    .sort((a, b) => 
-      ((a.fields as any).order || 0) - ((b.fields as any).order || 0)
-    );
-
-  const renderMenuItem = (item: Entry<EntrySkeletonType>) => {
-    const fields = item.fields as any;
-    const hasSubMenuItems = subMenuItems[item.sys.id]?.length > 0;
-
-    if (hasSubMenuItems) {
-      return (
-        <li key={item.sys.id} className="nav-item dropdown">
-          <a
-            className="nav-link dropdown-toggle"
-            href="#"
-            role="button"
-            onClick={(e: React.MouseEvent) => {
-              e.preventDefault();
-              toggleDropdown(item.sys.id);
-            }}
-            aria-expanded={openDropdowns[item.sys.id]}
-          >
-            {fields.label}
-          </a>
-          <ul className={`dropdown-menu ${openDropdowns[item.sys.id] ? 'show' : ''}`}>
-            {subMenuItems[item.sys.id]?.map((subItem) => (
-              <li key={subItem.sys.id}>
-                <a className="dropdown-item" href={subItem.fields.url}>
-                  {subItem.fields.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </li>
-      );
-    }
-
-    return (
-      <li key={item.sys.id} className="nav-item">
-        <a href={fields.url} className="nav-link">
-          {fields.label}
-        </a>
-      </li>
-    );
-  };
+  console.log('Rendering navigation with data:', {
+    menuItems: navigationData.fields.menu.length,
+    hasCTA: !!navigationData.fields.cta
+  });
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
@@ -182,9 +170,53 @@ export default function Navigation() {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className={`collapse navbar-collapse ${isOpen ? 'show' : ''}`}>
-          <ul className="navbar-nav ms-auto">
-            {sortedMenuItems.map(renderMenuItem)}
+          <ul className="navbar-nav me-auto">
+            {navigationData.fields.menu.map((item) => {
+              const fields = item.fields as any;
+              const hasSubMenuItems = subMenuItems[item.sys.id]?.length > 0;
+
+              if (hasSubMenuItems) {
+                return (
+                  <li key={item.sys.id} className="nav-item dropdown">
+                    <a
+                      className="nav-link dropdown-toggle"
+                      href="#"
+                      role="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleDropdown(item.sys.id);
+                      }}
+                      aria-expanded={openDropdowns[item.sys.id]}
+                    >
+                      {fields.label}
+                    </a>
+                    <ul className={`dropdown-menu ${openDropdowns[item.sys.id] ? 'show' : ''}`}>
+                      {subMenuItems[item.sys.id]?.map((subItem) => (
+                        <li key={subItem.sys.id}>
+                          <a className="dropdown-item" href={subItem.fields.url}>
+                            {subItem.fields.label}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                );
+              }
+
+              return (
+                <li key={item.sys.id} className="nav-item">
+                  <a href={fields.url} className="nav-link">
+                    {fields.label}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
+          {navigationData.fields.cta && (
+            <div className="ms-3">
+              <CTA cta={navigationData.fields.cta} />
+            </div>
+          )}
         </div>
       </div>
     </nav>

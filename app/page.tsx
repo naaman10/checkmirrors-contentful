@@ -19,19 +19,37 @@ interface PageContent {
 }
 
 async function getHomepageContent() {
-  const client = createClient({
-    space: process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID ?? '',
-    accessToken: process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN ?? '',
-  });
+  // Log environment variables for debugging
+  console.log('Checking environment variables...');
+  const spaceId = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID;
+  const accessToken = process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN;
+  
+  console.log('Space ID:', spaceId ? 'Present' : 'Missing');
+  console.log('Access Token:', accessToken ? 'Present' : 'Missing');
+
+  // Validate environment variables
+  if (!spaceId) {
+    throw new Error('NEXT_PUBLIC_CONTENTFUL_SPACE_ID is missing');
+  }
+  if (!accessToken) {
+    throw new Error('NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN is missing');
+  }
 
   try {
+    // Create Contentful client
+    const client = createClient({
+      space: spaceId,
+      accessToken: accessToken,
+    });
+
+    // Fetch the entry
     const entry = await client.getEntry('3vrx9Ezv34q2B8pY0kjP25', { 
       include: 3
     });
 
     return entry as unknown as PageContent;
   } catch (error) {
-    console.error('Error fetching content:', error);
+    console.error('Error in getHomepageContent:', error);
     throw error;
   }
 }
@@ -67,6 +85,6 @@ export default async function Home() {
     );
   } catch (error) {
     console.error('Error in Home component:', error);
-    return <main>Error loading content</main>;
+    return <main>Error loading content: {error instanceof Error ? error.message : 'Unknown error'}</main>;
   }
 } 
