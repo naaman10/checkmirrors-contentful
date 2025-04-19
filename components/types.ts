@@ -94,4 +94,63 @@ export interface FeatureSection {
   };
 }
 
-export type ContentSectionType = HeroBannerSection | TextSection | FeatureSection; 
+export interface BlogPost {
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: {
+    title: string;
+    slug: string;
+    publishDate: string;
+    author: {
+      fields: {
+        name: string;
+        avatar?: {
+          fields: {
+            image: Array<{
+              url: string;
+              secure_url: string;
+            }>;
+          };
+        };
+      };
+    };
+    featuredImage?: {
+      fields: {
+        altText: string;
+        image: Array<{
+          url: string;
+          secure_url: string;
+        }>;
+      };
+    };
+    content: string;
+    excerpt?: string;
+    tags?: string[];
+  };
+}
+
+export interface CardGroup {
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: {
+    title: string;
+    subtitle?: string;
+    items: Array<BlogPost | FeatureSection>;
+    variant?: 'default' | 'feature' | 'blog';
+    columns?: 1 | 2 | 3 | 4;
+  };
+}
+
+export type ContentSectionType = HeroBannerSection | TextSection | FeatureSection | CardGroup; 

@@ -157,66 +157,68 @@ export default function Navigation() {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container">
-        <a className="navbar-brand" href="/">
-          <h2><span className="title-a">check</span><span className="title-b">mirrors</span><span className="title-tagline"> School of Motoring</span></h2>
-        </a>
-        <button
-          className="navbar-toggler"
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-expanded={isOpen}
-          aria-label="Toggle navigation"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className={`collapse navbar-collapse ${isOpen ? 'show' : ''}`}>
-          <ul className="navbar-nav me-auto">
-            {navigationData.fields.menu.map((item) => {
-              const fields = item.fields as any;
-              const hasSubMenuItems = subMenuItems[item.sys.id]?.length > 0;
+        <div className="d-flex w-100 align-items-center">
+          <a className="navbar-brand me-auto" href="/">
+            <h2><span className="title-a">check</span><span className="title-b">mirrors</span><span className="title-tagline"> School of Motoring</span></h2>
+          </a>
+          <button
+            className="navbar-toggler"
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-expanded={isOpen}
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className={`collapse navbar-collapse ${isOpen ? 'show' : ''}`}>
+            <ul className="navbar-nav ms-auto">
+              {navigationData.fields.menu.map((item) => {
+                const fields = item.fields as any;
+                const hasSubMenuItems = subMenuItems[item.sys.id]?.length > 0;
 
-              if (hasSubMenuItems) {
+                if (hasSubMenuItems) {
+                  return (
+                    <li key={item.sys.id} className="nav-item dropdown">
+                      <a
+                        className="nav-link dropdown-toggle"
+                        href="#"
+                        role="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleDropdown(item.sys.id);
+                        }}
+                        aria-expanded={openDropdowns[item.sys.id]}
+                      >
+                        {fields.label}
+                      </a>
+                      <ul className={`dropdown-menu ${openDropdowns[item.sys.id] ? 'show' : ''}`}>
+                        {subMenuItems[item.sys.id]?.map((subItem) => (
+                          <li key={subItem.sys.id}>
+                            <a className="dropdown-item" href={subItem.fields.url}>
+                              {subItem.fields.label}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  );
+                }
+
                 return (
-                  <li key={item.sys.id} className="nav-item dropdown">
-                    <a
-                      className="nav-link dropdown-toggle"
-                      href="#"
-                      role="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        toggleDropdown(item.sys.id);
-                      }}
-                      aria-expanded={openDropdowns[item.sys.id]}
-                    >
+                  <li key={item.sys.id} className="nav-item">
+                    <a href={fields.url} className="nav-link">
                       {fields.label}
                     </a>
-                    <ul className={`dropdown-menu ${openDropdowns[item.sys.id] ? 'show' : ''}`}>
-                      {subMenuItems[item.sys.id]?.map((subItem) => (
-                        <li key={subItem.sys.id}>
-                          <a className="dropdown-item" href={subItem.fields.url}>
-                            {subItem.fields.label}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
                   </li>
                 );
-              }
-
-              return (
-                <li key={item.sys.id} className="nav-item">
-                  <a href={fields.url} className="nav-link">
-                    {fields.label}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-          {navigationData.fields.cta && (
-            <div className="ms-3">
-              <CTA cta={navigationData.fields.cta} />
-            </div>
-          )}
+              })}
+            </ul>
+            {navigationData.fields.cta && (
+              <div className="ms-3">
+                <CTA cta={navigationData.fields.cta} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>
