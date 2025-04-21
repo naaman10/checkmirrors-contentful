@@ -41,11 +41,21 @@ $accent-color: #FFC107;
 $primary-text-color: #212121;
 $secondary-text-color: #757575;
 $divider-color: #BDBDBD;
-$background-grey: #F7F9F8;
+$background-light: #F7F9F8;
+$background-dark: #002347;
+$background-grey: #F7F9F8;  
 // Font Variables
 $font-header: 'Roboto', sans-serif;
 $font-body: 'Roboto', sans-serif;
 /* Custom CSS */
+.bg-dark {
+  background-color: $background-dark!important;
+  color: $primary-color-text!important;
+}
+.bg-light {
+  background-color: $background-light!important;
+  color: $primary-text-color!important;
+}
 body {
   background-color: $background-grey;
   font-family: $font-body;
@@ -287,8 +297,22 @@ section h2 {
 }
 
 .btn-primary {
-  background-color: #388E3C !important;
-  border-color: #388E3C !important;
+  background: #fdc632;
+  padding: 0px 48px;
+  color: #002347;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 50px;
+  border-radius: 5px;
+  border: none !important;
+  outline: none !important;
+  text-align: center;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-transition: all 0.3s ease 0s;
+  -moz-transition: all 0.3s ease 0s;
+  -o-transition: all 0.3s ease 0s;
+  transition: all 0.3s ease 0s;
 }
 
 .btn-primary:hover {

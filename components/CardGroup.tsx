@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { CardGroup as CardGroupType, ComponentCtaLink } from './types';
 import CTA from './CTA';
 
@@ -71,9 +72,7 @@ export default function CardGroup({ title, subTitle, cards, columns = '3', backg
                 <div className="card-body">
                   <h3 className="card-title h4">{card.fields.title}</h3>
                   <div className="card-text">
-                    {card.fields.text.split('\n').map((line, i) => (
-                      <p key={i}>{line}</p>
-                    ))}
+                    <ReactMarkdown>{card.fields.text}</ReactMarkdown>
                   </div>
                 </div>
                 {card.fields.cta && (

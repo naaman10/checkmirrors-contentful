@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import CTA from './CTA';
 import styles from '../styles/Feature.module.css';
 
@@ -25,33 +24,35 @@ export default function Feature({ title, bodyText, media, alignment, background,
   const altText = media.fields.altText;
   const isRightAligned = alignment.toLowerCase() === 'right';
 
+  const getBackgroundClass = (background: string) => {
+    switch (background) {
+      case 'Dark':
+        return 'bg-dark';
+      case 'Light':
+        return 'bg-light';
+      default:
+        return 'bg-dark';
+    }
+  };
+
   return (
-    <section className={`${styles.featureSection} ${styles[`${background.toLowerCase()}Bg`]}`}>
-      <div className="container">
-        <div className={`row align-items-center ${isRightAligned ? 'flex-row-reverse' : ''}`}>
-          <div className="col-md-6">
-            <div className={styles.featureContent}>
-              <div className={styles.title} dangerouslySetInnerHTML={{ __html: title }} />
+    <section className={`${getBackgroundClass(background)} text-white py-12 px-4`}>
+      <div className="container-fluid py-5">
+        <div className={`row justify-content-center mt-3 ${isRightAligned ? 'flex-row-reverse' : ''}`}>
+          <div className="col-12 col-sm-12 col-md-6">
+            <div className="mb-3">
+              <div className="mb-3" dangerouslySetInnerHTML={{ __html: title }} />
               <p>{bodyText}</p>
               {cta && (
-                <div className={styles.featureCTA}>
+                <div className="mt-4">
                   <CTA cta={cta} />
                 </div>
               )}
             </div>
           </div>
-          <div className="col-md-6">
+          <div className="col-12 col-sm-12 col-md-4">
             {imageUrl && (
-              <div className={styles.featureImage}>
-                <Image
-                  src={imageUrl}
-                  alt={altText}
-                  width={600}
-                  height={400}
-                  className="img-fluid"
-                  priority
-                />
-              </div>
+              <img className="img-fluid" src={imageUrl} alt={altText} />
             )}
           </div>
         </div>

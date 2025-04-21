@@ -153,4 +153,13 @@ export interface CardGroup {
   };
 }
 
-export type ContentSectionType = HeroBannerSection | TextSection | FeatureSection | CardGroup; 
+export type ContentSectionType = HeroBannerSection | TextSection | FeatureSection | CardGroup;
+
+export interface BannerPromotion {
+  fields: {
+    internalName: string;
+    title: string;
+    cta?: CTA;
+    background: string;
+  };
+} 
