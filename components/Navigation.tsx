@@ -183,6 +183,7 @@ export default function Navigation() {
                         className="nav-link dropdown-toggle"
                         href="#"
                         role="button"
+                        data-bs-toggle="dropdown" 
                         onClick={(e) => {
                           e.preventDefault();
                           toggleDropdown(item.sys.id);

@@ -43,7 +43,7 @@ export default function HeroBanner({ heading, subHeading, backgroundImage, size,
       <div className="container position-relative" style={{ zIndex: 2 }}>
         <div className="row justify-content-center">
           <div className="col-md-8 text-center">
-            <h1 className="mb-3">{heading}</h1>
+            {size === "100" ? <h1><span className="title-a">check</span><span className="title-b">mirrors</span> <span className="title-c">Driving instructors in York</span></h1> : <h1 className="mb-3">{heading}</h1>}
             {subHeading && <p className="lead mb-4">{subHeading}</p>}
             {buttons && buttons.length > 0 && (
               <div className="cta-container d-flex justify-content-center gap-2">

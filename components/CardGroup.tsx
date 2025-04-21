@@ -74,12 +74,13 @@ export default function CardGroup({ title, subTitle, cards, columns = '3', backg
                   <div className="card-text">
                     <ReactMarkdown>{card.fields.text}</ReactMarkdown>
                   </div>
-                </div>
-                {card.fields.cta && (
-                  <div className="card-footer bg-transparent border-top-0">
+                  {card.fields.cta && (
+                  <div>
                     <CTA cta={card.fields.cta} />
                   </div>
                 )}
+                </div>
+
               </div>
             </div>
           ))}

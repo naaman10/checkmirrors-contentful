@@ -1,12 +1,16 @@
 'use client';
 
+import { useState } from 'react';
 import type { ComponentCtaAction } from './types';
+import ContactFormModal from './ContactFormModal';
 
 interface CTAActionProps {
   cta: ComponentCtaAction;
 }
 
 export default function CTAAction({ cta }: CTAActionProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   if (!cta?.fields) {
     console.warn('CTAAction component received invalid data');
     return null;
@@ -24,22 +28,12 @@ export default function CTAAction({ cta }: CTAActionProps) {
 
   const handleAction = () => {
     switch (action) {
-      case 'scroll':
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      case 'Contact Form':
+        setIsModalOpen(true);
         break;
-      case 'contact':
-        // Handle contact form opening
-        const contactForm = document.getElementById('contact-form');
-        if (contactForm) {
-          contactForm.scrollIntoView({ behavior: 'smooth' });
-        }
-        break;
-      case 'book':
-        // Handle booking form opening
-        const bookingForm = document.getElementById('booking-form');
-        if (bookingForm) {
-          bookingForm.scrollIntoView({ behavior: 'smooth' });
-        }
+      case 'Instructor Form':
+        // Handle instructor form action
+        console.log('Instructor form action');
         break;
       default:
         console.warn(`Unknown action type: ${action}`);
@@ -47,13 +41,19 @@ export default function CTAAction({ cta }: CTAActionProps) {
   };
 
   return (
-    <button 
-      className={className}
-      onClick={handleAction}
-      aria-label={label}
-      type="button"
-    >
-      {label}
-    </button>
+    <>
+      <button 
+        className={className}
+        onClick={handleAction}
+        aria-label={label}
+        type="button"
+      >
+        {label}
+      </button>
+      <ContactFormModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
+    </>
   );
 } 

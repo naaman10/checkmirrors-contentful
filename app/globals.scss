@@ -102,10 +102,10 @@ h2 .title-b {
 
 h1 span.title-b {
   background-image: url("https://www.checkmirrors.co.uk/img/eyes.png");
-  background-size: 23px 26px;
+  background-size: 24px 26px;
   background-repeat: no-repeat;
-  background-position-x: 44px;
-  background-position-y: 10px;
+  background-position-x: 50px;
+  background-position-y: 13px;
 }
 
 h2 .title-b {
@@ -182,8 +182,7 @@ section h2 {
 .img-fluid {
   border-radius: 12px;
 }
-.header_area .title-tagline {
-  color: white;
+.navbar-brand .title-tagline {
   font-size: 20px;
   font-family: $font-header;
   font-weight: 300;
@@ -195,14 +194,14 @@ section h2 {
 .navbar .nav .nav-item .nav-link {
   text-transform: uppercase;
 }
-.header_area.navbar_fixed .navbar .nav .nav-item .nav-link {
+.navbar_fixed .navbar .nav .nav-item .nav-link {
   color: black;
 }
-.header_area.navbar_fixed .navbar .nav .nav-item .nav-link:hover {
+.navbar_fixed .navbar .nav .nav-item .nav-link:hover {
   color: #fdc632;
   cursor: pointer;
 }
-.header_area .navbar .nav .nav-item .nav-link:hover {
+ .navbar .nav .nav-item .nav-link:hover {
   color: #fdc632;
   cursor: pointer;
 }
@@ -237,10 +236,10 @@ section h2 {
   .card-body {
     padding: 12px;
   }
-  .card-img-top,.card-img {
-    padding: 12px;
+  .card-img-top {
+    padding: 12px;;
     img {
-      border-radius: 12px;
+      border-radius: 12px!important;
       width: 100%;
     }
   }

@@ -39,9 +39,11 @@ export default function Feature({ title, bodyText, media, alignment, background,
     <section className={`${getBackgroundClass(background)} text-white py-12 px-4`}>
       <div className="container-fluid py-5">
         <div className={`row justify-content-center mt-3 ${isRightAligned ? 'flex-row-reverse' : ''}`}>
-          <div className="col-12 col-sm-12 col-md-6">
+          <div className="col-12 col-sm-12 col-md-4 d-flex align-items-center">
             <div className="mb-3">
-              <div className="mb-3" dangerouslySetInnerHTML={{ __html: title }} />
+              <div className="mb-3" dangerouslySetInnerHTML={{ 
+                __html: title.replace(/\n/g, '<br />') 
+              }} />
               <p>{bodyText}</p>
               {cta && (
                 <div className="mt-4">
@@ -52,7 +54,12 @@ export default function Feature({ title, bodyText, media, alignment, background,
           </div>
           <div className="col-12 col-sm-12 col-md-4">
             {imageUrl && (
-              <img className="img-fluid" src={imageUrl} alt={altText} />
+              <img 
+                className="img-fluid" 
+                src={imageUrl} 
+                alt={altText}
+                loading="lazy"
+              />
             )}
           </div>
         </div>
