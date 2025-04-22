@@ -1,62 +1,85 @@
 'use client';
 
 import React from 'react';
-import { Entry, EntrySkeletonType } from 'contentful';
+import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 import HeroBanner from './HeroBanner';
 import TextSection from './TextSection';
 import Feature from './Feature';
-import { HeroBannerSection, TextSection as TextSectionType, FeatureSection, CardGroup, BannerPromotion } from './types';
-import CardGroupComponent from './CardGroup';
+import { HeroBannerSection, TextSection as TextSectionType, FeatureSection, CardGroup, BannerPromotion, ComponentCtaLink } from './types';
 import BannerPromotionComponent from './BannerPromotion';
+import CardGroupComponent from './CardGroup';
 
-type ContentfulEntry<T> = Entry<EntrySkeletonType> & {
-  fields: T;
-};
+interface CardGroupFields {
+  title: string;
+  subTitle?: string;
+  cards: Array<{
+    sys: {
+      id: string;
+      contentType: {
+        sys: {
+          id: string;
+        };
+      };
+    };
+    fields: {
+      title: string;
+      text: string;
+      cardImage?: {
+        fields?: {
+          altText?: string;
+          image?: Array<{
+            url?: string;
+            secure_url?: string;
+          }>;
+        };
+      };
+      cta?: ComponentCtaLink;
+    };
+  }>;
+  columns?: string;
+  background?: string;
+}
 
-export default function ContentSection({ section }: { section: Entry<EntrySkeletonType> }) {
-  if (!section?.sys?.contentType?.sys?.id) {
+interface ContentSectionProps {
+  section: Entry<EntrySkeletonType, ChainModifiers>;
+}
+
+export default function ContentSection({ section }: ContentSectionProps) {
+  if (!section || !section.sys || !section.fields) {
     console.warn('Invalid section data:', section);
     return null;
   }
 
-  const contentType = section.sys.contentType.sys.id;
+  const contentType = section.sys.contentType?.sys?.id;
   console.log('Rendering content type:', contentType);
   console.log('Section data:', JSON.stringify(section, null, 2));
-  
-  // Ensure we have the fields before trying to render
-  if (!section.fields) {
-    console.warn(`Missing fields for content type: ${contentType}`);
-    return null;
-  }
 
-  try {
-    switch (contentType) {
-      case 'componentHeroBanner':
-        return <HeroBanner {...(section as ContentfulEntry<HeroBannerSection['fields']>).fields} />;
-      case 'text':
-        return <TextSection {...(section as ContentfulEntry<TextSectionType['fields']>).fields} />;
-      case 'componentFeature':
-        return <Feature {...(section as ContentfulEntry<FeatureSection['fields']>).fields} />;
-      case 'componentCardCardGroup':
-        // Safely extract the fields we need
-        const cardGroupFields = {
-          title: section.fields.title || '',
-          subTitle: section.fields.subTitle,
-          cards: Array.isArray(section.fields.cards) ? section.fields.cards : [],
-          columns: section.fields.columns || '3',
-          background: section.fields.background || 'Light'
-        };
-        
-        console.log('Processed CardGroup fields:', cardGroupFields);
-        return <CardGroupComponent {...cardGroupFields} />;
-      case 'componentBannerPromotion':
-        return <BannerPromotionComponent {...(section as ContentfulEntry<BannerPromotion['fields']>).fields} />;
-      default:
-        console.warn(`Unknown content type: ${contentType}`);
+  switch (contentType) {
+    case 'componentHeroBanner':
+      return <HeroBanner {...(section.fields as unknown as HeroBannerSection['fields'])} />;
+    case 'componentTextSection':
+      return <TextSection {...(section.fields as unknown as TextSectionType['fields'])} />;
+    case 'componentFeature':
+      return <Feature {...(section.fields as unknown as FeatureSection['fields'])} />;
+    case 'componentBannerPromotion':
+      return <BannerPromotionComponent {...(section.fields as unknown as BannerPromotion['fields'])} />;
+    case 'componentCardCardGroup':
+      const { title, subTitle, cards, columns, background } = section.fields as unknown as CardGroupFields;
+      if (!Array.isArray(cards)) {
+        console.warn('Cards is not an array:', cards);
         return null;
-    }
-  } catch (error) {
-    console.error(`Error rendering ${contentType}:`, error);
-    return null;
+      }
+      return (
+        <CardGroupComponent
+          title={title}
+          subTitle={subTitle}
+          cards={cards}
+          columns={columns}
+          background={background}
+        />
+      );
+    default:
+      console.warn('Unknown content type:', contentType);
+      return null;
   }
 } 
