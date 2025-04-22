@@ -145,13 +145,31 @@ export interface CardGroup {
     };
   };
   fields: {
+    internalName?: string;
     title: string;
     subTitle?: string;
     cards: Array<{
+      sys: {
+        id: string;
+        contentType: {
+          sys: {
+            id: string;
+          };
+        };
+      };
       fields: {
+        internalName?: string;
         title: string;
         text: string;
         cardImage?: {
+          sys: {
+            id: string;
+            contentType: {
+              sys: {
+                id: string;
+              };
+            };
+          };
           fields?: {
             altText?: string;
             image?: Array<{

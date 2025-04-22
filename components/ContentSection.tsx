@@ -38,23 +38,17 @@ export default function ContentSection({ section }: { section: Entry<EntrySkelet
       case 'componentFeature':
         return <Feature {...(section as ContentfulEntry<FeatureSection['fields']>).fields} />;
       case 'componentCardCardGroup':
-        const cardGroupFields = (section as ContentfulEntry<CardGroup['fields']>).fields;
-        console.log('CardGroup fields:', JSON.stringify(cardGroupFields, null, 2));
+        // Safely extract the fields we need
+        const cardGroupFields = {
+          title: section.fields.title || '',
+          subTitle: section.fields.subTitle,
+          cards: Array.isArray(section.fields.cards) ? section.fields.cards : [],
+          columns: section.fields.columns || '3',
+          background: section.fields.background || 'Light'
+        };
         
-        // Safely handle the cards array
-        const safeCards = Array.isArray(cardGroupFields.cards) 
-          ? cardGroupFields.cards 
-          : [];
-        
-        return (
-          <CardGroupComponent 
-            title={cardGroupFields.title || ''}
-            subTitle={cardGroupFields.subTitle}
-            cards={safeCards}
-            columns={cardGroupFields.columns}
-            background={cardGroupFields.background}
-          />
-        );
+        console.log('Processed CardGroup fields:', cardGroupFields);
+        return <CardGroupComponent {...cardGroupFields} />;
       case 'componentBannerPromotion':
         return <BannerPromotionComponent {...(section as ContentfulEntry<BannerPromotion['fields']>).fields} />;
       default:
