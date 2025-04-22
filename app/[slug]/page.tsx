@@ -40,7 +40,9 @@ async function logContentTypes() {
 async function getPageContent(slug: string): Promise<PageContent> {
   if (slug === 'home') {
     try {
-      const homepage = await client.getEntry<PageEntry>('3vrx9Ezv34q2B8pY0kjP25');
+      const homepage = await client.getEntry<PageEntry>('3vrx9Ezv34q2B8pY0kjP25', {
+        include: 3,
+      });
       return {
         title: homepage.fields.title,
         slug: 'home',
@@ -56,9 +58,10 @@ async function getPageContent(slug: string): Promise<PageContent> {
     const entries = await client.getEntries<PageEntry>({
       content_type: 'pageLanding',
       include: 3,
+      query: `fields.slug=${slug}`
     });
 
-    const page = entries.items.find(item => item.fields.slug === slug);
+    const page = entries.items[0];
     
     if (!page) {
       console.error(`Page not found for slug: ${slug}`);
@@ -81,6 +84,7 @@ export async function generateStaticParams() {
   try {
     const entries = await client.getEntries<PageEntry>({
       content_type: 'pageLanding',
+      include: 3,
     });
 
     const slugs = entries.items
