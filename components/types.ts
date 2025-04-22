@@ -1,3 +1,5 @@
+import { EntrySkeletonType, Entry } from 'contentful'
+
 export interface ComponentCtaLink {
   sys: {
     id: string;
@@ -95,45 +97,77 @@ export interface FeatureSection {
 }
 
 export interface BlogPost {
-  sys: {
-    id: string;
-    contentType: {
-      sys: {
-        id: string;
-      };
-    };
-  };
+  contentTypeId: 'blogPost'
   fields: {
-    title: string;
-    slug: string;
-    publishDate: string;
+    title: string
+    slug: string
+    publishDate: string
     author: {
       fields: {
-        name: string;
+        name: string
         avatar?: {
           fields: {
-            image: Array<{
-              url: string;
-              secure_url: string;
-            }>;
-          };
-        };
-      };
-    };
+            image: {
+              fields: {
+                file: {
+                  url: string
+                }
+                title: string
+              }
+            }
+          }
+        }
+      }
+    }
     featuredImage?: {
       fields: {
-        altText: string;
-        image: Array<{
-          url: string;
-          secure_url: string;
-        }>;
-      };
-    };
-    content: string;
-    excerpt?: string;
-    tags?: string[];
-  };
+        file: {
+          url: string
+        }
+        title: string
+      }
+    }
+    content: string
+    excerpt?: string
+    tags?: string[]
+  }
 }
+
+export interface Instructor {
+  contentTypeId: 'instructor'
+  fields: {
+    name: string
+    bio: string
+    qualifications?: string[]
+    profileImage?: {
+      fields: {
+        file: {
+          url: string
+        }
+        title: string
+      }
+    }
+  }
+}
+
+export interface Testimonial {
+  contentTypeId: 'testimonial'
+  fields: {
+    authorName: string
+    authorTitle?: string
+    testimonial: string
+    authorImage?: {
+      fields: {
+        file: {
+          url: string
+        }
+        title: string
+      }
+    }
+  }
+}
+
+export type ContentType = BlogPost | Instructor | Testimonial
 
 export interface CardGroup {
   sys: {
@@ -186,7 +220,26 @@ export interface CardGroup {
   };
 }
 
-export type ContentSectionType = HeroBannerSection | TextSection | FeatureSection | CardGroup;
+export interface Listings {
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: 'componentListings';
+      };
+    };
+  };
+  fields: {
+    items: Entry<BlogPost | Instructor | Testimonial>[];
+    contentType: 'blog' | 'instructors' | 'testimonials';
+    title?: string;
+    subTitle?: string;
+    columns?: number;
+    pagination?: boolean;
+  };
+}
+
+export type ContentSectionType = HeroBannerSection | TextSection | FeatureSection | CardGroup | Listings;
 
 export interface BannerPromotion {
   fields: {

@@ -1,146 +1,104 @@
 import React from 'react';
 import Image from 'next/image';
 import CTA from './CTA';
-import { BlogPost, FeatureSection, CTA as CTAType } from './types';
+import { BlogPost, FeatureSection, CTA as CTAType, ContentType, Instructor, Testimonial } from './types';
+import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
+import Link from 'next/link';
 
 interface CardProps {
-  content: BlogPost | FeatureSection;
-  variant?: 'default' | 'feature' | 'blog';
-  className?: string;
+  item: Entry<EntrySkeletonType, ChainModifiers>;
+  contentType: string;
 }
 
-export default function Card({ content, variant = 'default', className = '' }: CardProps) {
-  // Common card styles
-  const baseClasses = 'card h-100 shadow-sm';
-  const variantClasses = {
-    default: '',
-    feature: 'feature-card',
-    blog: 'blog-card'
-  };
+export default function Card({ item, contentType }: CardProps) {
+  if (!item.fields) return null;
 
-  // Helper function to get image URL
-  const getImageUrl = (imageArray: Array<{ url: string; secure_url: string }> | undefined) => {
-    const url = imageArray?.[0]?.secure_url || imageArray?.[0]?.url;
-    return url || '/placeholder.jpg'; // Fallback image
-  };
-
-  // Helper function to get image alt text
-  const getImageAlt = (altText: string | undefined, fallback: string) => {
-    return altText || fallback;
-  };
-
-  // Render different card types based on content type
-  if ('fields' in content) {
-    const fields = content.fields;
-
-    // Blog Post Card
-    if ('slug' in fields) {
-      const blogFields = fields as BlogPost['fields'];
-      const authorAvatar = blogFields.author?.fields?.avatar?.fields?.image;
-      const featuredImage = blogFields.featuredImage?.fields?.image;
-      const authorName = blogFields.author?.fields?.name || 'Unknown Author';
-
+  switch (contentType) {
+    case 'blog': {
+      const blogFields = item.fields as BlogPost['fields'];
       return (
-        <div className={`${baseClasses} ${variantClasses[variant]} ${className}`}>
-          {featuredImage && (
-            <div className="card-img-top">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          {blogFields.featuredImage?.fields?.file?.url && (
+            <div className="relative h-48">
               <Image
-                src={getImageUrl(featuredImage)}
-                alt={getImageAlt(blogFields.featuredImage?.fields?.altText, blogFields.title)}
-                width={400}
-                height={250}
-                className="img-fluid"
-                style={{ objectFit: 'cover' }}
+                src={`https:${blogFields.featuredImage.fields.file.url}`}
+                alt={blogFields.featuredImage.fields.title || 'Featured image'}
+                fill
+                className="object-cover"
               />
             </div>
           )}
-          <div className="card-body">
-            <h5 className="card-title">{blogFields.title}</h5>
-            <div className="d-flex align-items-center mb-3">
-              {authorAvatar && (
-                <div className="me-2">
-                  <Image
-                    src={getImageUrl(authorAvatar)}
-                    alt={`${authorName}'s avatar`}
-                    width={32}
-                    height={32}
-                    className="rounded-circle"
-                  />
-                </div>
-              )}
-              <div>
-                <small className="text-muted">By {authorName}</small>
-                <br />
-                <small className="text-muted">
-                  {new Date(blogFields.publishDate).toLocaleDateString('en-GB', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                  })}
-                </small>
-              </div>
-            </div>
+          <div className="p-6">
+            <h3 className="text-xl font-semibold mb-2">{blogFields.title}</h3>
             {blogFields.excerpt && (
-              <p className="card-text">{blogFields.excerpt}</p>
+              <p className="text-gray-600 mb-4">{blogFields.excerpt}</p>
             )}
-            {blogFields.tags && blogFields.tags.length > 0 && (
-              <div className="mt-3">
-                {blogFields.tags.map((tag) => (
-                  <span key={tag} className="badge bg-secondary me-1">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="card-footer bg-transparent border-top-0">
-            <a href={`/blog/${blogFields.slug}`} className="btn btn-primary">
-              Read More
-            </a>
+            <p className="text-sm text-gray-500">
+              {new Date(blogFields.publishDate).toLocaleDateString()}
+            </p>
           </div>
         </div>
       );
     }
 
-    // Feature Card
-    if ('title' in fields && 'bodyText' in fields) {
-      const featureFields = fields as FeatureSection['fields'];
-      const mediaImage = featureFields.media?.fields?.image;
-
+    case 'instructors': {
+      const instructorFields = item.fields as Instructor['fields'];
       return (
-        <div className={`${baseClasses} ${variantClasses[variant]} ${className}`}>
-          {mediaImage && (
-            <div className="card-img-top">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          {instructorFields.profileImage?.fields?.file?.url && (
+            <div className="relative w-32 h-32 mx-auto mb-4">
               <Image
-                src={getImageUrl(mediaImage)}
-                alt={getImageAlt(featureFields.media?.fields?.altText, featureFields.title)}
-                width={400}
-                height={250}
-                className="img-fluid"
-                style={{ objectFit: 'cover' }}
+                src={`https:${instructorFields.profileImage.fields.file.url}`}
+                alt={instructorFields.profileImage.fields.title || 'Profile image'}
+                fill
+                className="rounded-full object-cover"
               />
             </div>
           )}
-          <div className="card-body">
-            <h5 className="card-title">{featureFields.title}</h5>
-            <p className="card-text">{featureFields.bodyText}</p>
-            {featureFields.cta && (
-              <div className="mt-3">
-                <CTA cta={featureFields.cta} />
-              </div>
-            )}
-          </div>
+          <h3 className="text-xl font-semibold text-center mb-2">
+            {instructorFields.name}
+          </h3>
+          <p className="text-gray-600 mb-4">{instructorFields.bio}</p>
+          {instructorFields.qualifications && (
+            <ul className="text-sm text-gray-500">
+              {instructorFields.qualifications.map((qual, index) => (
+                <li key={index}>{qual}</li>
+              ))}
+            </ul>
+          )}
         </div>
       );
     }
-  }
 
-  // Fallback for unknown content types
-  return (
-    <div className={`${baseClasses} ${className}`}>
-      <div className="card-body">
-        <p className="card-text">Unsupported content type</p>
-      </div>
-    </div>
-  );
+    case 'testimonials': {
+      const testimonialFields = item.fields as Testimonial['fields'];
+      return (
+        <div className="bg-white rounded-lg shadow-md p-6">
+          {testimonialFields.authorImage?.fields?.file?.url && (
+            <div className="relative w-20 h-20 mx-auto mb-4">
+              <Image
+                src={`https:${testimonialFields.authorImage.fields.file.url}`}
+                alt={testimonialFields.authorImage.fields.title || 'Author image'}
+                fill
+                className="rounded-full object-cover"
+              />
+            </div>
+          )}
+          <h3 className="text-xl font-semibold text-center mb-2">
+            {testimonialFields.authorName}
+          </h3>
+          {testimonialFields.authorTitle && (
+            <p className="text-gray-500 text-center mb-4">
+              {testimonialFields.authorTitle}
+            </p>
+          )}
+          <p className="text-gray-600 italic">"{testimonialFields.testimonial}"</p>
+        </div>
+      );
+    }
+
+    default:
+      console.warn(`Unknown content type: ${contentType}`);
+      return null;
+  }
 } 
