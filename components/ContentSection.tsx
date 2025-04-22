@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
+import { Entry, EntrySkeletonType, ChainModifiers, Link } from 'contentful';
 import HeroBanner from './HeroBanner';
 import TextSection from './TextSection';
 import Feature from './Feature';
@@ -69,11 +69,21 @@ export default function ContentSection({ section }: ContentSectionProps) {
         console.warn('Cards is not an array:', cards);
         return null;
       }
+
+      // Filter out any invalid cards
+      const validCards = cards.filter(card => {
+        if (!card || typeof card !== 'object') {
+          console.warn('Invalid card:', card);
+          return false;
+        }
+        return true;
+      });
+
       return (
         <CardGroupComponent
           title={title}
           subTitle={subTitle}
-          cards={cards}
+          cards={validCards}
           columns={columns}
           background={background}
         />
