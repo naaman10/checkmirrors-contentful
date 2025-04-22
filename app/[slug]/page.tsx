@@ -38,6 +38,8 @@ async function logContentTypes() {
 }
 
 async function getPageContent(slug: string): Promise<PageContent> {
+  console.log('Fetching page content for slug:', slug);
+
   if (slug === 'home') {
     try {
       const homepage = await client.getEntry<PageEntry>('3vrx9Ezv34q2B8pY0kjP25', {
@@ -55,11 +57,21 @@ async function getPageContent(slug: string): Promise<PageContent> {
   }
 
   try {
+    // First, get all content types to see what's available
+    const contentTypes = await client.getContentTypes();
+    console.log('Available content types:', contentTypes.items.map(ct => ct.sys.id));
+
+    // Try to find the page using a more flexible query
     const entries = await client.getEntries<PageEntry>({
-      content_type: 'pageLanding',
       include: 3,
-      query: `fields.slug=${slug}`
+      select: ['fields', 'sys.id', 'sys.type', 'sys.contentType'],
+      query: slug
     });
+
+    console.log('Found entries:', entries.items.length);
+    if (entries.items.length > 0) {
+      console.log('Entry details:', JSON.stringify(entries.items[0], null, 2));
+    }
 
     const page = entries.items[0];
     
@@ -82,12 +94,27 @@ async function getPageContent(slug: string): Promise<PageContent> {
 
 export async function generateStaticParams() {
   try {
-    const entries = await client.getEntries<PageEntry>({
-      content_type: 'pageLanding',
-      include: 3,
-    });
+    // Log available content types
+    await logContentTypes();
 
-    const slugs = entries.items
+    // Get pages from both content types
+    const [pageEntries, pageLandingEntries] = await Promise.all([
+      client.getEntries<PageEntry>({
+        content_type: 'page',
+        include: 3,
+        select: ['fields', 'sys.id', 'sys.type', 'sys.contentType']
+      }),
+      client.getEntries<PageEntry>({
+        content_type: 'pageLanding',
+        include: 3,
+        select: ['fields', 'sys.id', 'sys.type', 'sys.contentType']
+      })
+    ]);
+
+    const slugs = [
+      ...pageEntries.items,
+      ...pageLandingEntries.items
+    ]
       .filter(item => item.fields.slug)
       .map(item => ({
         slug: item.fields.slug!
@@ -102,8 +129,15 @@ export async function generateStaticParams() {
   }
 }
 
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  return {
+    title: params.slug === 'home' ? 'Home' : params.slug,
+  };
+}
+
 export default async function Page({ params }: { params: { slug: string } }) {
-  const page = await getPageContent(params.slug);
+  const slug = params.slug;
+  const page = await getPageContent(slug);
 
   return (
     <main>
