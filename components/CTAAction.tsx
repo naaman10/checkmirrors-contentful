@@ -3,13 +3,15 @@
 import { useState } from 'react';
 import type { ComponentCtaAction } from './types';
 import ContactFormModal from './ContactFormModal';
+import InstructorFormModal from './InstructorFormModal';
 
 interface CTAActionProps {
   cta: ComponentCtaAction;
 }
 
 export default function CTAAction({ cta }: CTAActionProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isInstructorModalOpen, setIsInstructorModalOpen] = useState(false);
 
   if (!cta?.fields) {
     console.warn('CTAAction component received invalid data');
@@ -29,11 +31,10 @@ export default function CTAAction({ cta }: CTAActionProps) {
   const handleAction = () => {
     switch (action) {
       case 'Contact Form':
-        setIsModalOpen(true);
+        setIsContactModalOpen(true);
         break;
       case 'Instructor Form':
-        // Handle instructor form action
-        console.log('Instructor form action');
+        setIsInstructorModalOpen(true);
         break;
       default:
         console.warn(`Unknown action type: ${action}`);
@@ -51,8 +52,12 @@ export default function CTAAction({ cta }: CTAActionProps) {
         {label}
       </button>
       <ContactFormModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        isOpen={isContactModalOpen} 
+        onClose={() => setIsContactModalOpen(false)} 
+      />
+      <InstructorFormModal 
+        isOpen={isInstructorModalOpen} 
+        onClose={() => setIsInstructorModalOpen(false)} 
       />
     </>
   );

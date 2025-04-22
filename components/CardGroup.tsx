@@ -12,16 +12,16 @@ interface CardGroupProps {
     fields: {
       title: string;
       text: string;
-      cardImage: {
-        fields: {
-          altText: string;
-          image: Array<{
-            url: string;
-            secure_url: string;
+      cardImage?: {
+        fields?: {
+          altText?: string;
+          image?: Array<{
+            url?: string;
+            secure_url?: string;
           }>;
         };
       };
-      cta: ComponentCtaLink;
+      cta?: ComponentCtaLink;
     };
   }>;
   columns?: string;
@@ -61,10 +61,10 @@ export default function CardGroup({ title, subTitle, cards, columns = '3', backg
           {cards?.map((card, index) => (
             <div key={index} className={gridClass}>
               <div className="card h-100">
-                {card.fields.cardImage?.fields?.image?.[0] && (
+                {card.fields.cardImage?.fields?.image?.[0]?.url && (
                   <img
                     src={card.fields.cardImage.fields.image[0].url}
-                    alt={card.fields.cardImage.fields.altText}
+                    alt={card.fields.cardImage.fields.altText || ''}
                     className="card-img-top"
                     style={{ height: '200px', objectFit: 'cover' }}
                   />
@@ -75,12 +75,11 @@ export default function CardGroup({ title, subTitle, cards, columns = '3', backg
                     <ReactMarkdown>{card.fields.text}</ReactMarkdown>
                   </div>
                   {card.fields.cta && (
-                  <div>
-                    <CTA cta={card.fields.cta} />
-                  </div>
-                )}
+                    <div>
+                      <CTA cta={card.fields.cta} />
+                    </div>
+                  )}
                 </div>
-
               </div>
             </div>
           ))}
