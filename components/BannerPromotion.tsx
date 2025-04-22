@@ -1,21 +1,34 @@
 import React from 'react';
-import { BannerPromotion, CTA, ComponentCtaAction, ComponentCtaLink } from './types';
+import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 import CTAAction from './CTAAction';
 import CTALink from './CTALink';
 
 interface BannerPromotionProps {
-  internalName: string;
-  title: string;
-  ctAs?: CTA[];
-  background: string;
+  section: Entry<EntrySkeletonType, ChainModifiers>;
 }
 
-export default function BannerPromotionComponent({ 
-  internalName, 
-  title, 
-  ctAs, 
-  background 
-}: BannerPromotionProps) {
+export default function BannerPromotionComponent({ section }: BannerPromotionProps) {
+  if (!section?.fields) {
+    console.warn('Invalid section data in BannerPromotion component');
+    return null;
+  }
+
+  const { internalName, title, ctAs, background } = section.fields as {
+    internalName: string;
+    title: string;
+    ctAs?: Array<{
+      sys: {
+        contentType: {
+          sys: {
+            id: string;
+          };
+        };
+      };
+      fields: any;
+    }>;
+    background: string;
+  };
+
   const getBackgroundClass = (background: string) => {
     switch (background) {
       case 'Dark':
@@ -27,13 +40,13 @@ export default function BannerPromotionComponent({
     }
   };
 
-  const renderCTA = (cta: CTA) => {
+  const renderCTA = (cta: any) => {
     if (!cta) return null;
     
     if (cta.sys.contentType.sys.id === 'componentCtaAction') {
-      return <CTAAction cta={cta as ComponentCtaAction} />;
+      return <CTAAction cta={cta} />;
     } else if (cta.sys.contentType.sys.id === 'componentCtaLink') {
-      return <CTALink cta={cta as ComponentCtaLink} />;
+      return <CTALink cta={cta} />;
     }
     return null;
   };

@@ -1,4 +1,5 @@
-import type { Metadata } from 'next'
+'use client'
+
 import { Inter } from 'next/font/google'
 import Navigation from '../components/Navigation'
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -6,11 +7,6 @@ import './globals.scss'
 import Footer from '@/components/Footer'
 
 const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
-  title: 'Checkmirrors School of Motoring',
-  description: 'Professional driving instruction in the UK',
-}
 
 export default function RootLayout({
   children,

@@ -1,95 +1,42 @@
 'use client';
 
 import React from 'react';
-import { Entry, EntrySkeletonType, ChainModifiers, Link } from 'contentful';
+import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 import HeroBanner from './HeroBanner';
 import TextSection from './TextSection';
 import Feature from './Feature';
-import { HeroBannerSection, TextSection as TextSectionType, FeatureSection, CardGroup, BannerPromotion, ComponentCtaLink } from './types';
 import BannerPromotionComponent from './BannerPromotion';
 import CardGroupComponent from './CardGroup';
-
-interface CardGroupFields {
-  title: string;
-  subTitle?: string;
-  cards: Array<{
-    sys: {
-      id: string;
-      contentType: {
-        sys: {
-          id: string;
-        };
-      };
-    };
-    fields: {
-      title: string;
-      text: string;
-      cardImage?: {
-        fields?: {
-          altText?: string;
-          image?: Array<{
-            url?: string;
-            secure_url?: string;
-          }>;
-        };
-      };
-      cta?: ComponentCtaLink;
-    };
-  }>;
-  columns?: string;
-  background?: string;
-}
+import Embed from './Embed';
 
 interface ContentSectionProps {
   section: Entry<EntrySkeletonType, ChainModifiers>;
 }
 
 export default function ContentSection({ section }: ContentSectionProps) {
-  if (!section || !section.sys || !section.fields) {
-    console.warn('Invalid section data:', section);
+  if (!section?.sys?.contentType?.sys?.id) {
+    console.warn('Invalid section data in ContentSection component');
     return null;
   }
 
-  const contentType = section.sys.contentType?.sys?.id;
-  console.log('Rendering content type:', contentType);
+  console.log('Rendering content type:', section.sys.contentType.sys.id);
   console.log('Section data:', JSON.stringify(section, null, 2));
 
-  switch (contentType) {
+  switch (section.sys.contentType.sys.id) {
     case 'componentHeroBanner':
-      return <HeroBanner {...(section.fields as unknown as HeroBannerSection['fields'])} />;
+      return <HeroBanner section={section} />;
     case 'componentTextSection':
-      return <TextSection {...(section.fields as unknown as TextSectionType['fields'])} />;
+      return <TextSection section={section} />;
     case 'componentFeature':
-      return <Feature {...(section.fields as unknown as FeatureSection['fields'])} />;
+      return <Feature section={section} />;
     case 'componentBannerPromotion':
-      return <BannerPromotionComponent {...(section.fields as unknown as BannerPromotion['fields'])} />;
+      return <BannerPromotionComponent section={section} />;
     case 'componentCardCardGroup':
-      const { title, subTitle, cards, columns, background } = section.fields as unknown as CardGroupFields;
-      if (!Array.isArray(cards)) {
-        console.warn('Cards is not an array:', cards);
-        return null;
-      }
-
-      // Filter out any invalid cards
-      const validCards = cards.filter(card => {
-        if (!card || typeof card !== 'object') {
-          console.warn('Invalid card:', card);
-          return false;
-        }
-        return true;
-      });
-
-      return (
-        <CardGroupComponent
-          title={title}
-          subTitle={subTitle}
-          cards={validCards}
-          columns={columns}
-          background={background}
-        />
-      );
+      return <CardGroupComponent section={section} />;
+    case 'componentEmbed':
+      return <Embed section={section} />;
     default:
-      console.warn('Unknown content type:', contentType);
+      console.warn(`Unknown content type: ${section.sys.contentType.sys.id}`);
       return null;
   }
 } 

@@ -2,41 +2,50 @@
 
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { CardGroup as CardGroupType, ComponentCtaLink } from './types';
+import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 import CTA from './CTA';
 
 interface CardGroupProps {
-  title: string;
-  subTitle?: string;
-  cards: Array<{
-    sys: {
-      id: string;
-      contentType: {
-        sys: {
-          id: string;
-        };
-      };
-    };
-    fields: {
-      title: string;
-      text: string;
-      cardImage?: {
-        fields?: {
-          altText?: string;
-          image?: Array<{
-            url?: string;
-            secure_url?: string;
-          }>;
-        };
-      };
-      cta?: ComponentCtaLink;
-    };
-  }>;
-  columns?: string;
-  background?: string;
+  section: Entry<EntrySkeletonType, ChainModifiers>;
 }
 
-export default function CardGroup({ title, subTitle, cards = [], columns = '3', background = 'Light' }: CardGroupProps) {
+export default function CardGroup({ section }: CardGroupProps) {
+  if (!section?.fields) {
+    console.warn('Invalid section data in CardGroup component');
+    return null;
+  }
+
+  const { title, subTitle, cards = [], columns = '3', background = 'Light' } = section.fields as {
+    title: string;
+    subTitle?: string;
+    cards: Array<{
+      sys: {
+        id: string;
+        contentType: {
+          sys: {
+            id: string;
+          };
+        };
+      };
+      fields: {
+        title: string;
+        text: string;
+        cardImage?: {
+          fields?: {
+            altText?: string;
+            image?: Array<{
+              url?: string;
+              secure_url?: string;
+            }>;
+          };
+        };
+        cta?: any;
+      };
+    }>;
+    columns?: string;
+    background?: string;
+  };
+
   console.log('CardGroup props:', { title, subTitle, cards: cards?.length, columns, background });
   
   const getGridClasses = (cols: string) => {

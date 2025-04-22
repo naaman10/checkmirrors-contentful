@@ -1,20 +1,35 @@
 'use client';
 
+import React from 'react';
+import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 import CTA from './CTA';
-import type { CTA as CTAType } from './types';
 
 interface HeroBannerProps {
-  heading: string;
-  subHeading?: string;
-  backgroundImage: Array<{
-    url: string;
-    secure_url: string;
-  }>;
-  size: string;
-  buttons?: CTAType[];
+  section: Entry<EntrySkeletonType, ChainModifiers>;
 }
 
-export default function HeroBanner({ heading, subHeading, backgroundImage, size, buttons = [] }: HeroBannerProps) {
+export default function HeroBanner({ section }: HeroBannerProps) {
+  if (!section?.fields) {
+    console.warn('Invalid section data in HeroBanner component');
+    return null;
+  }
+
+  const { heading, subHeading, backgroundImage, size, buttons = [] } = section.fields as {
+    heading: string;
+    subHeading?: string;
+    backgroundImage: Array<{
+      url: string;
+      secure_url: string;
+    }>;
+    size: string;
+    buttons?: any[];
+  };
+
+  if (!backgroundImage?.[0]) {
+    console.warn('No background image found in HeroBanner component');
+    return null;
+  }
+
   const image = backgroundImage[0];
   
   return (

@@ -1,26 +1,40 @@
 import React from 'react';
 import CTA from './CTA';
-import styles from '../styles/Feature.module.css';
+import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 
 interface FeatureProps {
-  title: string;
-  bodyText: string;
-  media: {
-    fields: {
-      altText: string;
-      image: Array<{
-        url: string;
-        secure_url: string;
-      }>;
-    };
-  };
-  alignment: 'Left' | 'Right';
-  background: 'Light' | 'Dark';
-  cta?: any;
+  section: Entry<EntrySkeletonType, ChainModifiers>;
 }
 
-export default function Feature({ title, bodyText, media, alignment, background, cta }: FeatureProps) {
-  const imageUrl = media.fields.image[0]?.secure_url || media.fields.image[0]?.url;
+export default function Feature({ section }: FeatureProps) {
+  if (!section?.fields) {
+    console.warn('Invalid section data in Feature component');
+    return null;
+  }
+
+  const { title, bodyText, media, alignment, background, cta } = section.fields as {
+    title: string;
+    bodyText: string;
+    media: {
+      fields: {
+        altText: string;
+        image: Array<{
+          url: string;
+          secure_url: string;
+        }>;
+      };
+    };
+    alignment: 'Left' | 'Right';
+    background: 'Light' | 'Dark';
+    cta?: any;
+  };
+
+  if (!media?.fields?.image?.[0]) {
+    console.warn('Invalid media data in Feature component');
+    return null;
+  }
+
+  const imageUrl = media.fields.image[0].secure_url || media.fields.image[0].url;
   const altText = media.fields.altText;
   const isRightAligned = alignment.toLowerCase() === 'right';
 
