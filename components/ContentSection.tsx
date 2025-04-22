@@ -14,10 +14,16 @@ type ContentfulEntry<T> = Entry<EntrySkeletonType> & {
 };
 
 export default function ContentSection({ section }: { section: Entry<EntrySkeletonType> }) {
+  if (!section?.sys?.contentType?.sys?.id) {
+    console.warn('Invalid section data:', section);
+    return null;
+  }
+
   const contentType = section.sys.contentType.sys.id;
   
   // Ensure we have the fields before trying to render
   if (!section.fields) {
+    console.warn(`Missing fields for content type: ${contentType}`);
     return null;
   }
 
@@ -30,13 +36,20 @@ export default function ContentSection({ section }: { section: Entry<EntrySkelet
       case 'componentFeature':
         return <Feature {...(section as ContentfulEntry<FeatureSection['fields']>).fields} />;
       case 'componentCardCardGroup':
-        return <CardGroupComponent {...(section as ContentfulEntry<CardGroup['fields']>).fields} />;
+        const cardGroupFields = (section as ContentfulEntry<CardGroup['fields']>).fields;
+        if (!cardGroupFields.cards) {
+          console.warn('CardGroup missing cards array');
+          return null;
+        }
+        return <CardGroupComponent {...cardGroupFields} />;
       case 'componentBannerPromotion':
         return <BannerPromotionComponent {...(section as ContentfulEntry<BannerPromotion['fields']>).fields} />;
       default:
+        console.warn(`Unknown content type: ${contentType}`);
         return null;
     }
   } catch (error) {
+    console.error(`Error rendering ${contentType}:`, error);
     return null;
   }
 } 

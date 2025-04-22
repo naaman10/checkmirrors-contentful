@@ -146,10 +146,25 @@ export interface CardGroup {
   };
   fields: {
     title: string;
-    subtitle?: string;
-    items: Array<BlogPost | FeatureSection>;
-    variant?: 'default' | 'feature' | 'blog';
-    columns?: 1 | 2 | 3 | 4;
+    subTitle?: string;
+    cards: Array<{
+      fields: {
+        title: string;
+        text: string;
+        cardImage?: {
+          fields?: {
+            altText?: string;
+            image?: Array<{
+              url?: string;
+              secure_url?: string;
+            }>;
+          };
+        };
+        cta?: CTA;
+      };
+    }>;
+    columns?: string;
+    background?: string;
   };
 }
 
