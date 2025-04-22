@@ -9,6 +9,14 @@ interface CardGroupProps {
   title: string;
   subTitle?: string;
   cards: Array<{
+    sys: {
+      id: string;
+      contentType: {
+        sys: {
+          id: string;
+        };
+      };
+    };
     fields: {
       title: string;
       text: string;
@@ -28,8 +36,8 @@ interface CardGroupProps {
   background?: string;
 }
 
-export default function CardGroup({ title, subTitle, cards, columns = '3', background = 'Light' }: CardGroupProps) {
-  console.log('CardGroup props:', { columns, cards: cards?.length });
+export default function CardGroup({ title, subTitle, cards = [], columns = '3', background = 'Light' }: CardGroupProps) {
+  console.log('CardGroup props:', { title, subTitle, cards: cards?.length, columns, background });
   
   const getGridClasses = (cols: string) => {
     switch (cols) {
@@ -57,32 +65,39 @@ export default function CardGroup({ title, subTitle, cards, columns = '3', backg
           {subTitle && <p className="lead text-muted">{subTitle}</p>}
         </div>
         
-        <div className="row g-4">
-          {cards?.map((card, index) => (
-            <div key={index} className={gridClass}>
-              <div className="card h-100">
-                {card.fields.cardImage?.fields?.image?.[0]?.url && (
-                  <img
-                    src={card.fields.cardImage.fields.image[0].url}
-                    alt={card.fields.cardImage.fields.altText || ''}
-                    className="card-img-top"
-                    style={{ height: '200px', objectFit: 'cover' }}
-                  />
-                )}
-                <div className="card-body">
-                  <h3 className="card-title h4">{card.fields.title}</h3>
-                  <div className="card-text">
-                    <ReactMarkdown>{card.fields.text}</ReactMarkdown>
-                  </div>
-                  {card.fields.cta && (
-                    <div>
-                      <CTA cta={card.fields.cta} />
-                    </div>
+        <div className="row g-4 justify-content-center">
+          {cards.map((card, index) => {
+            console.log('Rendering card:', index, card);
+            const imageUrl = card.fields.cardImage?.fields?.image?.[0]?.secure_url || 
+                           card.fields.cardImage?.fields?.image?.[0]?.url;
+            const altText = card.fields.cardImage?.fields?.altText || '';
+            
+            return (
+              <div key={card.sys.id || index} className={gridClass}>
+                <div className="card h-100">
+                  {imageUrl && (
+                    <img
+                      src={imageUrl}
+                      alt={altText}
+                      className="card-img-top"
+                      style={{ height: '200px', objectFit: 'cover' }}
+                    />
                   )}
+                  <div className="card-body">
+                    <h3 className="card-title h4">{card.fields.title}</h3>
+                    <div className="card-text">
+                      <ReactMarkdown>{card.fields.text}</ReactMarkdown>
+                    </div>
+                    {card.fields.cta && (
+                      <div>
+                        <CTA cta={card.fields.cta} />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

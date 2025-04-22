@@ -20,6 +20,8 @@ export default function ContentSection({ section }: { section: Entry<EntrySkelet
   }
 
   const contentType = section.sys.contentType.sys.id;
+  console.log('Rendering content type:', contentType);
+  console.log('Section data:', JSON.stringify(section, null, 2));
   
   // Ensure we have the fields before trying to render
   if (!section.fields) {
@@ -37,11 +39,22 @@ export default function ContentSection({ section }: { section: Entry<EntrySkelet
         return <Feature {...(section as ContentfulEntry<FeatureSection['fields']>).fields} />;
       case 'componentCardCardGroup':
         const cardGroupFields = (section as ContentfulEntry<CardGroup['fields']>).fields;
-        if (!cardGroupFields.cards) {
-          console.warn('CardGroup missing cards array');
-          return null;
-        }
-        return <CardGroupComponent {...cardGroupFields} />;
+        console.log('CardGroup fields:', JSON.stringify(cardGroupFields, null, 2));
+        
+        // Safely handle the cards array
+        const safeCards = Array.isArray(cardGroupFields.cards) 
+          ? cardGroupFields.cards 
+          : [];
+        
+        return (
+          <CardGroupComponent 
+            title={cardGroupFields.title || ''}
+            subTitle={cardGroupFields.subTitle}
+            cards={safeCards}
+            columns={cardGroupFields.columns}
+            background={cardGroupFields.background}
+          />
+        );
       case 'componentBannerPromotion':
         return <BannerPromotionComponent {...(section as ContentfulEntry<BannerPromotion['fields']>).fields} />;
       default:
