@@ -8,7 +8,7 @@ interface ListingProps {
   contentType: string;
   title?: string;
   subTitle?: string;
-  columns?: number;
+  columns?: string;
   pagination?: {
     enabled: boolean;
     itemsPerPage?: number;
@@ -19,6 +19,7 @@ interface ListingProps {
 const contentTypeMap: Record<string, string> = {
   'Instructors': 'instructor',
   'Blog': 'blogPost',
+  'Articles': 'pageBlogPost',
   'Testimonials': 'testimonial'
 };
 
@@ -26,7 +27,7 @@ export default function Listing({
   contentType, 
   title, 
   subTitle, 
-  columns = 3, 
+  columns = '3', 
   pagination = { enabled: false } 
 }: ListingProps) {
   const [items, setItems] = useState<Entry<EntrySkeletonType, ChainModifiers>[]>([]);
@@ -49,12 +50,22 @@ export default function Listing({
         }
 
         console.log('Fetching items for content type:', mappedContentType);
-        const response = await client.getEntries({
+        
+        // Set up query parameters
+        const query: any = {
           content_type: mappedContentType,
           limit: 1000, // Adjust based on your needs
-        });
+          include: 3 // Include linked entries up to 3 levels deep
+        };
 
-        console.log('Fetched items:', response.items);
+        // Add ordering for instructors
+        if (contentType === 'Instructors') {
+          query.order = 'fields.order';
+        }
+
+        const response = await client.getEntries(query);
+
+        console.log('Fetched items:', JSON.stringify(response.items, null, 2));
         setItems(response.items);
         setLoading(false);
       } catch (err) {
@@ -87,7 +98,8 @@ export default function Listing({
   }
 
   const getColumnClass = () => {
-    switch (columns) {
+    const numColumns = parseInt(columns, 10) || 3;
+    switch (numColumns) {
       case 1:
         return 'col-12'
       case 2:
@@ -103,41 +115,55 @@ export default function Listing({
 
   return (
     <section className="py-5">
-      {title && (
-        <h2 className="text-center mb-4">
-          {title}
-        </h2>
-      )}
-      {subTitle && (
-        <p className="text-center mb-4">
-          {subTitle}
-        </p>
-      )}
       <div className="container">
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${columns} gap-6`}>
+        {title && (
+          <h2 className="text-center mb-4">
+            {title}
+          </h2>
+        )}
+        {subTitle && (
+          <p className="text-center mb-4">
+            {subTitle}
+          </p>
+        )}
+        <div className="row g-4">
           {currentItems.map((item, index) => (
-            <Card key={item.sys.id} item={item} contentType={contentType.toLowerCase()} />
+            <div key={item.sys.id} className={getColumnClass()}>
+              <div className="card h-100">
+                <Card item={item} contentType={contentType.toLowerCase()} columns={columns} />
+              </div>
+            </div>
           ))}
         </div>
         {pagination?.enabled && totalPages > 1 && (
-          <div className="flex justify-center mt-8">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 mr-2 bg-gray-200 rounded disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span className="px-4 py-2">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 ml-2 bg-gray-200 rounded disabled:opacity-50"
-            >
-              Next
-            </button>
+          <div className="d-flex justify-content-center mt-4">
+            <nav aria-label="Page navigation">
+              <ul className="pagination">
+                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                  <button
+                    className="page-link"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                </li>
+                <li className="page-item">
+                  <span className="page-link">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                </li>
+                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                  <button
+                    className="page-link"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </div>
         )}
       </div>

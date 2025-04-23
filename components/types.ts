@@ -97,7 +97,7 @@ export interface FeatureSection {
 }
 
 export interface BlogPost {
-  contentTypeId: 'blogPost'
+  contentTypeId: 'pageBlogPost'
   fields: {
     title: string
     slug: string
@@ -117,6 +117,15 @@ export interface BlogPost {
             }
           }
         }
+      }
+    }
+    featureImage?: {
+      fields: {
+        altText: string
+        image: Array<{
+          url: string
+          secure_url: string
+        }>
       }
     }
     featuredImage?: {
@@ -139,14 +148,18 @@ export interface Instructor {
     name: string
     bio: string
     qualifications?: string[]
-    profileImage?: {
+    image?: {
       fields: {
-        file: {
-          url: string
-        }
-        title: string
+        altText?: string;
+        image: Array<{
+          url: string;
+          secure_url: string;
+        }>;
       }
     }
+    order?: number
+    active?: boolean
+    internalName?: string
   }
 }
 

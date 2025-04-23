@@ -1,9 +1,12 @@
+'use client';
+
 import React from 'react';
+import Image from 'next/image';
 import CTA from './CTA';
-import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
+import { getCloudinaryUrl, getImageDimensions } from '@/utils/cloudinary';
 
 interface FeatureProps {
-  section: Entry<EntrySkeletonType, ChainModifiers>;
+  section: any;
 }
 
 export default function Feature({ section }: FeatureProps) {
@@ -38,6 +41,9 @@ export default function Feature({ section }: FeatureProps) {
   const altText = media.fields.altText;
   const isRightAligned = alignment.toLowerCase() === 'right';
 
+  const dimensions = getImageDimensions('featured');
+  const transformedUrl = getCloudinaryUrl(imageUrl, dimensions.width, dimensions.height, 'featured');
+
   const getBackgroundClass = (background: string) => {
     switch (background) {
       case 'Dark':
@@ -67,12 +73,13 @@ export default function Feature({ section }: FeatureProps) {
             </div>
           </div>
           <div className="col-12 col-sm-12 col-md-4">
-            {imageUrl && (
-              <img 
-                className="img-fluid" 
-                src={imageUrl} 
+            {transformedUrl && (
+              <Image 
+                src={transformedUrl}
                 alt={altText}
-                loading="lazy"
+                width={dimensions.width}
+                height={dimensions.height}
+                className="rounded-3 img-fluid"
               />
             )}
           </div>

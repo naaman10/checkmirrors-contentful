@@ -2,6 +2,7 @@ import { createClient } from 'contentful';
 import Image from 'next/image';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { BLOCKS, INLINES } from '@contentful/rich-text-types';
+import { getCloudinaryUrl, getImageDimensions } from '@/utils/cloudinary';
 
 interface BlogPost {
   sys: {
@@ -104,19 +105,25 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
                             post.fields.featuredImage?.fields?.image?.[0]?.url;
     const featuredImageAlt = post.fields.featuredImage?.fields?.altText || post.fields.title;
 
+    const avatarDimensions = getImageDimensions('avatar');
+    const featuredDimensions = getImageDimensions('featured');
+    
+    const transformedAvatarUrl = authorAvatar ? getCloudinaryUrl(authorAvatar, avatarDimensions.width, avatarDimensions.height, 'avatar') : null;
+    const transformedFeaturedUrl = featuredImageUrl ? getCloudinaryUrl(featuredImageUrl, featuredDimensions.width, featuredDimensions.height, 'featured') : null;
+
     return (
       <main className="container py-5">
         <article className="bg-white rounded shadow-sm p-4">
           <header className="mb-4">
             <h1 className="display-4 mb-3">{post.fields.title}</h1>
             <div className="d-flex align-items-center mb-3">
-              {authorAvatar && (
+              {transformedAvatarUrl && (
                 <div className="me-3">
                   <Image
-                    src={authorAvatar}
+                    src={transformedAvatarUrl}
                     alt={`${post.fields.author.fields.name}'s avatar`}
-                    width={40}
-                    height={40}
+                    width={avatarDimensions.width}
+                    height={avatarDimensions.height}
                     className="rounded-circle"
                   />
                 </div>
@@ -135,14 +142,14 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             </div>
           </header>
 
-          {featuredImageUrl && (
+          {transformedFeaturedUrl && (
             <div className="mb-4">
               <Image
-                src={featuredImageUrl}
+                src={transformedFeaturedUrl}
                 alt={featuredImageAlt}
-                width={1200}
-                height={600}
-                className="img-fluid rounded"
+                width={featuredDimensions.width}
+                height={featuredDimensions.height}
+                className="rounded"
                 priority
               />
             </div>

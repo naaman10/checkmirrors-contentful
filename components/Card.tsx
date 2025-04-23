@@ -4,67 +4,183 @@ import CTA from './CTA';
 import { BlogPost, FeatureSection, CTA as CTAType, ContentType, Instructor, Testimonial } from './types';
 import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 import Link from 'next/link';
+import { getCloudinaryUrl, getImageDimensions } from '../utils/cloudinary';
 
 interface CardProps {
   item: Entry<EntrySkeletonType, ChainModifiers>;
   contentType: string;
+  columns?: string;
 }
 
-export default function Card({ item, contentType }: CardProps) {
+interface ContentfulImage {
+  fields?: {
+    altText?: string;
+    image?: Array<{
+      url?: string;
+      secure_url?: string;
+    }>;
+    file?: {
+      url?: string;
+    };
+    title?: string;
+  };
+}
+
+export default function Card({ item, contentType, columns = '3' }: CardProps) {
   if (!item.fields) return null;
 
-  switch (contentType) {
-    case 'blog': {
-      const blogFields = item.fields as BlogPost['fields'];
+  console.log('Card rendering for type:', contentType);
+  console.log('Item fields:', JSON.stringify(item.fields, null, 2));
+
+  const getImageUrl = (imageData: ContentfulImage | null | undefined) => {
+    if (!imageData?.fields) {
+      console.log('No valid image data:', imageData);
+      return null;
+    }
+
+    // Handle the new structure (file.url)
+    if (imageData.fields.file?.url) {
+      return imageData.fields.file.url;
+    }
+
+    // Handle the old structure (image array with url/secure_url)
+    if (imageData.fields.image?.[0]) {
+      return imageData.fields.image[0].secure_url || imageData.fields.image[0].url;
+    }
+
+    console.log('No valid image URL found in:', imageData);
+    return null;
+  };
+
+  const getImageAlt = (imageData: ContentfulImage | null | undefined) => {
+    if (!imageData?.fields) return '';
+    return imageData.fields.altText || imageData.fields.title || '';
+  };
+
+  const isSingleColumn = parseInt(columns, 10) === 1;
+
+  const renderImage = (imageUrl: string | null | undefined, alt: string, contentType: string, hasPadding: boolean = false) => {
+    if (!imageUrl) return null;
+    
+    const dimensions = getImageDimensions(contentType);
+    const transformedUrl = getCloudinaryUrl(imageUrl, dimensions.width, dimensions.height, contentType);
+    if (!transformedUrl) return null;
+    
+    if (isSingleColumn) {
       return (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {blogFields.featuredImage?.fields?.file?.url && (
-            <div className="relative h-48">
-              <Image
-                src={`https:${blogFields.featuredImage.fields.file.url}`}
-                alt={blogFields.featuredImage.fields.title || 'Featured image'}
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
-          <div className="p-6">
-            <h3 className="text-xl font-semibold mb-2">{blogFields.title}</h3>
-            {blogFields.excerpt && (
-              <p className="text-gray-600 mb-4">{blogFields.excerpt}</p>
-            )}
-            <p className="text-sm text-gray-500">
-              {new Date(blogFields.publishDate).toLocaleDateString()}
-            </p>
+        <div className="col-4">
+          <div className="card-img-top">
+            <Image
+              src={transformedUrl}
+              alt={alt}
+              width={dimensions.width}
+              height={dimensions.height}
+              className="rounded-3 img-fluid"
+              priority
+            />
           </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="card-img-top">
+        <Image
+          src={transformedUrl}
+          alt={alt}
+          width={dimensions.width}
+          height={dimensions.height}
+          className="rounded-3 img-fluid"
+          priority
+        />
+      </div>
+    );
+  };
+
+  const renderCardBody = (content: React.ReactNode) => {
+    if (isSingleColumn) {
+      return <div className="col-8">{content}</div>;
+    }
+    return content;
+  };
+
+  switch (contentType) {
+    case 'blog':
+    case 'pageblogpost':
+    case 'articles': {
+      const blogFields = item.fields as BlogPost['fields'];
+      const imageData = blogFields.featureImage || blogFields.featuredImage;
+      const imageUrl = getImageUrl(imageData as ContentfulImage);
+      const imageAlt = getImageAlt(imageData as ContentfulImage) || 'Featured image';
+      
+      const cardContent = (
+        <div className="card-body">
+          <h5 className="card-title">{blogFields.title}</h5>
+          {blogFields.publishDate && (
+            <p className="card-text">
+              <small className="text-muted">
+                {new Date(blogFields.publishDate).toLocaleDateString('en-GB', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </small>
+            </p>
+          )}
+          <Link href={`/blog/${blogFields.slug}`} className="btn btn-primary">
+            Read More
+          </Link>
+        </div>
+      );
+
+      return (
+        <div className="card h-100">
+          {isSingleColumn ? (
+            <div className="row g-0 h-100">
+              {renderImage(imageUrl, imageAlt, contentType, true)}
+              {renderCardBody(cardContent)}
+            </div>
+          ) : (
+            <>
+              {renderImage(imageUrl, imageAlt, contentType, true)}
+              {cardContent}
+            </>
+          )}
         </div>
       );
     }
 
     case 'instructors': {
       const instructorFields = item.fields as Instructor['fields'];
-      return (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          {instructorFields.profileImage?.fields?.file?.url && (
-            <div className="relative w-32 h-32 mx-auto mb-4">
-              <Image
-                src={`https:${instructorFields.profileImage.fields.file.url}`}
-                alt={instructorFields.profileImage.fields.title || 'Profile image'}
-                fill
-                className="rounded-full object-cover"
-              />
-            </div>
-          )}
-          <h3 className="text-xl font-semibold text-center mb-2">
-            {instructorFields.name}
-          </h3>
-          <p className="text-gray-600 mb-4">{instructorFields.bio}</p>
+      const imageUrl = getImageUrl(instructorFields.image as ContentfulImage);
+      const imageAlt = getImageAlt(instructorFields.image as ContentfulImage) || 'Profile image';
+      
+      const cardContent = (
+        <div className="card-body text-center">
+          <h5 className="card-title">{instructorFields.name}</h5>
+          <p className="card-text">{instructorFields.bio}</p>
           {instructorFields.qualifications && (
-            <ul className="text-sm text-gray-500">
+            <ul className="list-unstyled">
               {instructorFields.qualifications.map((qual, index) => (
-                <li key={index}>{qual}</li>
+                <li key={index} className="text-muted">{qual}</li>
               ))}
             </ul>
+          )}
+        </div>
+      );
+
+      return (
+        <div className="card h-100">
+          {isSingleColumn ? (
+            <div className="row g-0 h-100">
+              {renderImage(imageUrl, imageAlt, contentType, true)}
+              {renderCardBody(cardContent)}
+            </div>
+          ) : (
+            <>
+              {renderImage(imageUrl, imageAlt, contentType, true)}
+              {cardContent}
+            </>
           )}
         </div>
       );
@@ -72,27 +188,34 @@ export default function Card({ item, contentType }: CardProps) {
 
     case 'testimonials': {
       const testimonialFields = item.fields as Testimonial['fields'];
-      return (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          {testimonialFields.authorImage?.fields?.file?.url && (
-            <div className="relative w-20 h-20 mx-auto mb-4">
-              <Image
-                src={`https:${testimonialFields.authorImage.fields.file.url}`}
-                alt={testimonialFields.authorImage.fields.title || 'Author image'}
-                fill
-                className="rounded-full object-cover"
-              />
-            </div>
-          )}
-          <h3 className="text-xl font-semibold text-center mb-2">
-            {testimonialFields.authorName}
-          </h3>
+      const imageUrl = getImageUrl(testimonialFields.authorImage as ContentfulImage);
+      const imageAlt = getImageAlt(testimonialFields.authorImage as ContentfulImage) || 'Author image';
+      
+      const cardContent = (
+        <div className="card-body text-center">
+          <h5 className="card-title">{testimonialFields.authorName}</h5>
           {testimonialFields.authorTitle && (
-            <p className="text-gray-500 text-center mb-4">
-              {testimonialFields.authorTitle}
-            </p>
+            <h6 className="card-subtitle mb-2 text-muted">{testimonialFields.authorTitle}</h6>
           )}
-          <p className="text-gray-600 italic">"{testimonialFields.testimonial}"</p>
+          <blockquote className="blockquote mb-0">
+            <p className="card-text">"{testimonialFields.testimonial}"</p>
+          </blockquote>
+        </div>
+      );
+
+      return (
+        <div className="card h-100">
+          {isSingleColumn ? (
+            <div className="row g-0 h-100">
+              {renderImage(imageUrl, imageAlt, contentType)}
+              {renderCardBody(cardContent)}
+            </div>
+          ) : (
+            <>
+              {renderImage(imageUrl, imageAlt, contentType)}
+              {cardContent}
+            </>
+          )}
         </div>
       );
     }

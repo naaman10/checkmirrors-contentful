@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
+import Image from 'next/image';
+import { getCloudinaryUrl, getImageDimensions } from '@/utils/cloudinary';
 import CTA from './CTA';
 
 interface HeroBannerProps {
-  section: Entry<EntrySkeletonType, ChainModifiers>;
+  section: any;
 }
 
 export default function HeroBanner({ section }: HeroBannerProps) {
@@ -31,12 +32,14 @@ export default function HeroBanner({ section }: HeroBannerProps) {
   }
 
   const image = backgroundImage[0];
+  const dimensions = getImageDimensions('featured');
+  const transformedUrl = getCloudinaryUrl(image.secure_url || image.url, dimensions.width, dimensions.height, 'featured');
   
   return (
     <section 
       className="hero-banner d-flex align-items-center justify-content-center position-relative"
       style={{
-        backgroundImage: `url(${image.secure_url})`,
+        backgroundImage: transformedUrl ? `url(${transformedUrl})` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         minHeight: `${size}vh`,
@@ -55,23 +58,22 @@ export default function HeroBanner({ section }: HeroBannerProps) {
           zIndex: 1
         }}
       />
-      <div className="container position-relative" style={{ zIndex: 2 }}>
-        <div className="row justify-content-center">
-          <div className="col-md-8 text-center">
-            {size === "100" ? <h1><span className="title-a">check</span><span className="title-b">mirrors</span> <span className="title-c">Driving instructors in York</span></h1> : <h1 className="mb-3">{heading}</h1>}
-            {subHeading && <p className="lead mb-4">{subHeading}</p>}
-            {buttons && buttons.length > 0 && (
-              <div className="cta-container d-flex justify-content-center gap-2">
-                {buttons.map((button, index) => (
-                  <CTA
-                    key={index}
-                    cta={button}
-                  />
-                ))}
-              </div>
-            )}
+      <div className="container position-relative z-2 text-center">
+        <h1 className="display-4 mb-3">{heading}</h1>
+        {subHeading && <p className="lead mb-4">{subHeading}</p>}
+        {buttons && buttons.length > 0 && (
+          <div className="d-flex justify-content-center gap-3">
+            {buttons.map((button, index) => (
+              <a
+                key={index}
+                href={button.fields.url}
+                className={`btn ${button.fields.style === 'Primary' ? 'btn-primary' : 'btn-outline-light'}`}
+              >
+                {button.fields.text}
+              </a>
+            ))}
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

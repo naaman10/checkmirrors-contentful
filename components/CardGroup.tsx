@@ -85,12 +85,13 @@ export default function CardGroup({ section }: CardGroupProps) {
               <div key={card.sys.id || index} className={gridClass}>
                 <div className="card h-100">
                   {imageUrl && (
-                    <img
-                      src={imageUrl}
-                      alt={altText}
-                      className="card-img-top"
-                      style={{ height: '200px', objectFit: 'cover' }}
-                    />
+                    <div className="card-img-top">
+                      <img
+                        src={imageUrl}
+                        alt={altText}
+                        style={{ height: '200px', objectFit: 'cover' }}
+                      />
+                    </div>
                   )}
                   <div className="card-body">
                     <h3 className="card-title h4">{card.fields.title}</h3>
