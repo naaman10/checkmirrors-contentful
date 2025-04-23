@@ -7,9 +7,10 @@ import { getCloudinaryUrl, getImageDimensions } from '@/utils/cloudinary';
 
 interface FeatureProps {
   section: any;
+  isEmbedded?: boolean;
 }
 
-export default function Feature({ section }: FeatureProps) {
+export default function Feature({ section, isEmbedded = false }: FeatureProps) {
   if (!section?.fields) {
     console.warn('Invalid section data in Feature component');
     return null;
@@ -45,6 +46,9 @@ export default function Feature({ section }: FeatureProps) {
   const transformedUrl = getCloudinaryUrl(imageUrl, dimensions.width, dimensions.height, 'featured');
 
   const getBackgroundClass = (background: string) => {
+    if (isEmbedded) {
+      return 'bg-transparent';
+    }
     switch (background) {
       case 'Dark':
         return 'bg-dark';
@@ -56,7 +60,7 @@ export default function Feature({ section }: FeatureProps) {
   };
 
   return (
-    <section className={`${getBackgroundClass(background)} text-white py-12 px-4`}>
+    <section className={`${getBackgroundClass(background)} ${isEmbedded ? 'text-dark' : 'text-white'} py-12 px-4`}>
       <div className="container-fluid py-5">
         <div className={`row justify-content-center mt-3 ${isRightAligned ? 'flex-row-reverse' : ''}`}>
           <div className="col-12 col-sm-12 col-md-4 d-flex align-items-center">
