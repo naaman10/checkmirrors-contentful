@@ -336,6 +336,13 @@ ul.home-features {
 .home-features li {
   list-style: none;
 }
+.list-unstyled {
+  li {
+    p {
+      margin-bottom: 0px!important; 
+    }
+  }
+}
 .banner_area {
   background-image: url('https://res.cloudinary.com/njh101010/image/upload/t_pagebanner/checkmirrors/2024/image00017.webp');
   background-size: cover;

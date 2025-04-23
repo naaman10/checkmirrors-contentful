@@ -18,8 +18,9 @@ export const getCloudinaryUrl = (url: string, width: number, height: number, con
   if (parts.length !== 2) return url;
   
   const customTransformations = getTransformations(contentType);
+  const heightParam = height > 0 ? `,h_${height}` : '';
   
-  return `${parts[0]}/upload/${customTransformations}c_${crop},w_${width},h_${height}/${parts[1]}`;
+  return `${parts[0]}/upload/${customTransformations}c_${crop},w_${width}${heightParam}/${parts[1]}`;
 };
 
 export const getImageDimensions = (contentType: string) => {

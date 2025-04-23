@@ -59,7 +59,7 @@ export default function HeroBanner({ section }: HeroBannerProps) {
         }}
       />
       <div className="container position-relative z-2 text-center">
-        <h1 className="display-4 mb-3">{heading}</h1>
+        <h1 className="mb-3">{heading}</h1>
         {subHeading && <p className="lead mb-4">{subHeading}</p>}
         {buttons && buttons.length > 0 && (
           <div className="d-flex justify-content-center gap-3">

@@ -70,7 +70,7 @@ export default function CardGroup({ section }: CardGroupProps) {
     <section className={`py-5 ${background === 'Dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
       <div className="container">
         <div className="text-center mb-5">
-          <h2 className="display-4 mb-3">{title}</h2>
+          <h2 className="mb-3">{title}</h2>
           {subTitle && <p className="lead text-muted">{subTitle}</p>}
         </div>
         

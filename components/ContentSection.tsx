@@ -21,9 +21,6 @@ export default function ContentSection({ section }: ContentSectionProps) {
     return null;
   }
 
-  console.log('Rendering content type:', section.sys.contentType.sys.id);
-  console.log('Section data:', JSON.stringify(section, null, 2));
-
   switch (section.sys.contentType.sys.id) {
     case 'componentHeroBanner':
       return <HeroBanner section={section} />;
@@ -39,14 +36,9 @@ export default function ContentSection({ section }: ContentSectionProps) {
       return <Embed section={section} />;
     case 'componentListings': {
       const listings = section as unknown as Listings;
-      console.log('Listings data:', JSON.stringify(listings, null, 2));
-      console.log('Listings fields:', JSON.stringify(listings.fields, null, 2));
-      console.log('Listings items type:', typeof listings.fields.items);
-      console.log('Listings items is array:', Array.isArray(listings.fields.items));
       
       // Ensure items is an array and not undefined
       const items = Array.isArray(listings.fields.items) ? listings.fields.items : [];
-      console.log('Processed items:', items);
       
       // Ensure pagination has the correct structure
       const pagination = typeof listings.fields.pagination === 'boolean' 

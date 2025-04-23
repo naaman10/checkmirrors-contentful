@@ -5,8 +5,6 @@ import { createClient, Entry, EntrySkeletonType } from 'contentful';
 import CTA from './CTA';
 import { ComponentCtaAction } from './types';
 
-console.log('Navigation component file loaded');
-
 interface NavigationMenuItem {
   sys: {
     id: string;
@@ -42,8 +40,6 @@ interface NavigationData {
 }
 
 export default function Navigation() {
-  console.log('Navigation component rendering');
-  
   const [navigationData, setNavigationData] = useState<NavigationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,7 +103,6 @@ export default function Navigation() {
           }
         }
       } catch (err) {
-        console.error('Navigation Error:', err instanceof Error ? err.message : 'Failed to fetch navigation data');
         setError(err instanceof Error ? err.message : 'Failed to fetch navigation data');
       } finally {
         setLoading(false);
@@ -117,14 +112,6 @@ export default function Navigation() {
     fetchNavigation();
   }, []);
 
-  console.log('Navigation render state:', {
-    loading,
-    error,
-    navigationData: navigationData ? 'Present' : 'Missing',
-    hasCTA: navigationData?.fields?.cta ? 'Yes' : 'No',
-    menuItems: navigationData?.fields?.menu?.length || 0
-  });
-
   const toggleDropdown = (id: string) => {
     setOpenDropdowns((prev) => ({
       ...prev,
@@ -133,26 +120,17 @@ export default function Navigation() {
   };
 
   if (loading) {
-    console.log('Navigation is loading...');
     return <div>Loading navigation...</div>;
   }
   if (error) {
-    console.log('Navigation error:', error);
     return <div className="alert alert-danger">Error: {error}</div>;
   }
   if (!navigationData) {
-    console.log('No navigation data available');
     return null;
   }
   if (!navigationData.fields?.menu) {
-    console.log('No menu items found in navigation data');
     return <div>No navigation items found</div>;
   }
-
-  console.log('Rendering navigation with data:', {
-    menuItems: navigationData.fields.menu.length,
-    hasCTA: !!navigationData.fields.cta
-  });
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
