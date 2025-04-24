@@ -9,6 +9,8 @@ import BannerPromotionComponent from './BannerPromotion';
 import CardGroupComponent from './CardGroup';
 import Embed from './Embed';
 import Listing from './Listing';
+import Video from './Video';
+import RichText from './RichText';
 import { Listings } from './types';
 
 interface ContentSectionProps {
@@ -34,6 +36,10 @@ export default function ContentSection({ section }: ContentSectionProps) {
       return <CardGroupComponent section={section} />;
     case 'componentEmbed':
       return <Embed section={section} />;
+    case 'componentVideo':
+      return <Video section={section} />;
+    case 'richText':
+      return <RichText section={section} />;
     case 'componentListings': {
       const listings = section as unknown as Listings;
       
