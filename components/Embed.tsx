@@ -13,16 +13,16 @@ export default function Embed({ section }: EmbedProps) {
     return null;
   }
 
-  const { embedType } = section.fields as {
+  const { embedType, embedCode } = section.fields as {
     embedType: string;
+    embedCode?: string;
   };
 
-  if (embedType === 'script') {
+  if (embedType === 'script' && embedCode) {
     return (
       <div 
         className="embed-container" 
-        id="trustmary-container"
-        data-trustmary-app="5S6TVoaG11"
+        dangerouslySetInnerHTML={{ __html: embedCode }}
       />
     );
   }
