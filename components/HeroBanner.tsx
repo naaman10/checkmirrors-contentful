@@ -59,18 +59,20 @@ export default function HeroBanner({ section }: HeroBannerProps) {
         }}
       />
       <div className="container position-relative z-2 text-center">
-        <h1 className="mb-3">{heading}</h1>
+        {size === '100' ? (
+          <h1 className="mb-3">
+            <span className="title-a">check</span>
+            <span className="title-b">mirrors</span>
+            <span className="title-c">{heading}</span>
+          </h1>
+        ) : (
+          <h1 className="mb-3">{heading}</h1>
+        )}
         {subHeading && <p className="lead mb-4">{subHeading}</p>}
         {buttons && buttons.length > 0 && (
           <div className="d-flex justify-content-center gap-3">
             {buttons.map((button, index) => (
-              <a
-                key={index}
-                href={button.fields.url}
-                className={`btn ${button.fields.style === 'Primary' ? 'btn-primary' : 'btn-outline-light'}`}
-              >
-                {button.fields.text}
-              </a>
+              <CTA key={index} cta={button} />
             ))}
           </div>
         )}

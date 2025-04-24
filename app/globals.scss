@@ -365,12 +365,37 @@ ul.home-features {
 .event-link {
   color: #FFC107;
 }
-.footer-area.section_gap {
+.footer-area {
   padding: 50px 0;
+  background-color: #A9A9A9;
 }
-.footer-area .footer-bottom a.termly-display-preferences {
+.footer-bottom {
+  padding: 20px 0;
+  background-color: #A9A9A9;
+}
+.footer-area.footer-bottom a.termly-display-preferences {
   color: #7b838a;
  }
+ .footer-area .footer-bottom .footer-social a {
+  background: #334f6c;
+  color: #A9A9A9;
+  width: 20px;
+  width: 40px;
+  display: inline-table;
+  height: 40px;
+  text-align: center;
+  padding-top: 10px;
+  margin-left: 10px;
+  -webkit-transition: all 0.3s ease 0s;
+  -moz-transition: all 0.3s ease 0s;
+  -o-transition: all 0.3s ease 0s;
+  transition: all 0.3s ease 0s;
+  &:hover {
+    background-color: #FFC107;
+    color: #002347;
+  }
+ }
+
 input.success,textarea.success {
   background-color: white;
   border: 1px solid green!important;
