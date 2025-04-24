@@ -181,8 +181,72 @@ export async function getPageContent(slug: string | string[]): Promise<PageConte
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const fullPath = params.slug;
+export async function generateStaticParams() {
+  try {
+    // Get all page entries
+    const entries = await client.getEntries<PageEntry>({
+      include: 3,
+      content_type: 'pageLanding'
+    });
+
+    console.log('Total entries received:', entries.items.length);
+
+    // Process all entries to generate paths
+    const paths = entries.items
+      .filter(entry => {
+        // Only process entries that have a valid slug
+        const hasValidSlug = !!entry?.fields?.slug;
+        if (!hasValidSlug) {
+          console.log('Skipping entry with invalid slug:', entry?.sys?.id);
+          return false;
+        }
+        return true;
+      })
+      .map(entry => {
+        try {
+          const entrySlug = entry.fields.slug;
+          const parentSlug = entry.fields?.pageParent?.fields?.slug;
+
+          // If the page has a parent, create the full path as an array
+          if (parentSlug) {
+            const fullPath = `${parentSlug}/${entrySlug}`;
+            console.log('Creating child page path:', {
+              parentSlug,
+              childSlug: entrySlug,
+              fullPath
+            });
+            return {
+              slug: fullPath.split('/')  // Split the path into an array
+            };
+          }
+
+          // Otherwise just use the page's slug
+          console.log('Creating direct page path:', {
+            slug: entrySlug
+          });
+          return {
+            slug: [entrySlug]  // Wrap single slug in array
+          };
+        } catch (error) {
+          console.error('Error processing entry for path:', error);
+          return null;
+        }
+      })
+      .filter(Boolean);
+
+    // Add homepage to static params
+    const allPaths = [...paths, { slug: ['home'] }];
+    console.log('Generated static paths:', allPaths);
+    return allPaths;
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    // Return at least the homepage to ensure the site doesn't break
+    return [{ slug: ['home'] }];
+  }
+}
+
+export async function generateMetadata({ params }: { params: { slug: string[] } }) {
+  const fullPath = params.slug.join('/');
   const page = await getPageContent(fullPath);
   
   return {
@@ -190,19 +254,20 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-async function getPageData(slug: string) {
-  console.log('getPageData - slug:', slug);
-  return await getPageContent(slug);
+async function getPageData(slug: string[]) {
+  const fullPath = slug.join('/');
+  console.log('getPageData - fullPath:', fullPath);
+  return await getPageContent(fullPath);
 }
 
 // Add dynamic configuration
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  const fullPath = params.slug;
+export default async function Page({ params }: { params: { slug: string[] } }) {
+  const fullPath = params.slug.join('/');
   console.log('Page component - fullPath:', fullPath);
-  const page = await getPageData(fullPath);
+  const page = await getPageData(params.slug);
 
   console.log('Page content:', {
     title: page.title,
