@@ -97,49 +97,64 @@ export interface FeatureSection {
 }
 
 export interface BlogPost {
-  contentTypeId: 'pageBlogPost'
+  contentTypeId: 'pageBlogPost';
   fields: {
-    title: string
-    slug: string
-    publishDate: string
+    title: string;
+    slug: string;
+    publishDate: string;
     author: {
       fields: {
-        name: string
+        name: string;
         avatar?: {
           fields: {
             image: {
               fields: {
                 file: {
-                  url: string
-                }
-                title: string
-              }
-            }
-          }
-        }
-      }
-    }
+                  url: string;
+                };
+                title: string;
+              };
+            };
+          };
+        };
+      };
+    };
     featureImage?: {
       fields: {
-        altText: string
-        image: Array<{
-          url: string
-          secure_url: string
-        }>
-      }
-    }
+        image: {
+          fields: {
+            file: {
+              url: string;
+            };
+            title: string;
+          };
+        };
+      };
+    };
     featuredImage?: {
       fields: {
-        file: {
-          url: string
-        }
-        title: string
-      }
-    }
-    content: string
-    excerpt?: string
-    tags?: string[]
-  }
+        image: {
+          fields: {
+            file: {
+              url: string;
+            };
+            title: string;
+          };
+        };
+      };
+    };
+    content: string;
+    excerpt?: string;
+    category: string;
+  };
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: string;
+      };
+    };
+  };
 }
 
 export interface Instructor {

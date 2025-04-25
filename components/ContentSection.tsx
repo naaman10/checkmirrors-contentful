@@ -74,7 +74,11 @@ export default function ContentSection({ section }: ContentSectionProps) {
             ? { enabled: fields.pagination }
             : fields.pagination
         }
-        filter={fields.contentType?.toLowerCase() === 'instructors'}
+        filter={fields.contentType?.toLowerCase() === 'instructors' || 
+                fields.contentType?.toLowerCase() === 'blog' || 
+                fields.contentType?.toLowerCase() === 'blogs' || 
+                fields.contentType?.toLowerCase() === 'article' || 
+                fields.contentType?.toLowerCase() === 'articles'}
       />;
     }
     default:

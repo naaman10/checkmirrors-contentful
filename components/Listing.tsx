@@ -24,7 +24,17 @@ const contentTypeMap: Record<string, string> = {
   'Instructor': 'instructor',
   'Instructors': 'instructor',
   'blog': 'pageBlogPost',
-  'testimonial': 'testimonial'
+  'blogs': 'pageBlogPost',
+  'Blog': 'pageBlogPost',
+  'Blogs': 'pageBlogPost',
+  'article': 'pageBlogPost',
+  'articles': 'pageBlogPost',
+  'Article': 'pageBlogPost',
+  'Articles': 'pageBlogPost',
+  'testimonial': 'testimonial',
+  'testimonials': 'testimonial',
+  'Testimonial': 'testimonial',
+  'Testimonials': 'testimonial'
 };
 
 export default function Listing({ 
@@ -63,6 +73,7 @@ export default function Listing({
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -131,24 +142,76 @@ export default function Listing({
     fetchItems();
   }, [contentType, initialItems]);
 
-  // Get all unique tags from instructors
+  // Get all unique tags from instructors with counts
   const allTags = useMemo(() => {
     if (normalizedContentType !== 'instructor' && normalizedContentType !== 'instructors') return [];
-    return Array.from(new Set(
-      items.flatMap(item => (item.fields as Instructor['fields']).tags || [])
-    )).sort();
+    
+    const tagCounts = items.reduce((acc, item) => {
+      const tags = (item.fields as Instructor['fields']).tags || [];
+      tags.forEach(tag => {
+        acc[tag] = (acc[tag] || 0) + 1;
+      });
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return Object.entries(tagCounts)
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => a.tag.localeCompare(b.tag));
   }, [items, normalizedContentType]);
 
-  // Filter items based on selected tags
+  // Get all unique categories from articles with counts
+  const allCategories = useMemo(() => {
+    if (normalizedContentType !== 'blog' && normalizedContentType !== 'blogs' && 
+        normalizedContentType !== 'article' && normalizedContentType !== 'articles') return [];
+    
+    const categoryCounts = items.reduce((acc, item) => {
+      const category = (item.fields as BlogPost['fields']).category;
+      if (category) {
+        acc[category] = (acc[category] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return Object.entries(categoryCounts)
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => a.category.localeCompare(b.category));
+  }, [items, normalizedContentType]);
+
+  // Filter items based on selected tags or categories
   const filteredItems = useMemo(() => {
-    if (normalizedContentType !== 'instructor' && normalizedContentType !== 'instructors' || !filter || selectedTags.length === 0) {
-      return items;
+    if (!filter) return items;
+
+    if ((normalizedContentType === 'instructor' || normalizedContentType === 'instructors') && selectedTags.length > 0) {
+      return items.filter(item => {
+        const instructorTags = (item.fields as Instructor['fields']).tags || [];
+        return selectedTags.some(tag => instructorTags.includes(tag));
+      });
     }
-    return items.filter(item => {
-      const instructorTags = (item.fields as Instructor['fields']).tags || [];
-      return selectedTags.some(tag => instructorTags.includes(tag));
-    });
-  }, [items, normalizedContentType, filter, selectedTags]);
+
+    if ((normalizedContentType === 'blog' || normalizedContentType === 'blogs' || 
+         normalizedContentType === 'article' || normalizedContentType === 'articles') && 
+        selectedCategories.length > 0) {
+      console.log('Filtering articles by categories:', {
+        selectedCategories,
+        totalItems: items.length
+      });
+      
+      const filtered = items.filter(item => {
+        const fields = item.fields as BlogPost['fields'];
+        console.log('Checking article:', {
+          id: item.sys.id,
+          category: fields.category,
+          matches: selectedCategories.includes(fields.category)
+        });
+        return selectedCategories.includes(fields.category);
+      });
+      
+      console.log('Filtered articles:', filtered.length);
+      return filtered;
+    }
+
+    return items;
+  }, [items, normalizedContentType, filter, selectedTags, selectedCategories]);
 
   const itemsPerPage = pagination?.itemsPerPage || 6;
   const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage);
@@ -161,6 +224,15 @@ export default function Listing({
       prev.includes(tag) 
         ? prev.filter(t => t !== tag)
         : [...prev, tag]
+    );
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  const handleCategoryToggle = (category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
     );
     setCurrentPage(1); // Reset to first page when filters change
   };
@@ -212,13 +284,15 @@ export default function Listing({
           </p>
         )}
         <div className="row">
-          {filter && (normalizedContentType === 'instructor' || normalizedContentType === 'instructors') && allTags.length > 0 && (
+          {filter && (
             <div className="col-12 col-md-3 mb-4 mb-md-0">
               <div className="card">
                 <div className="card-body">
                   <h5 className="card-title">Filter by</h5>
                   <div className="d-flex flex-column gap-3">
-                    {allTags.map(tag => (
+                    {/* Instructor Tags Filter */}
+                    {(normalizedContentType === 'instructor' || normalizedContentType === 'instructors') && 
+                     allTags.length > 0 && allTags.map(({ tag, count }) => (
                       <div key={tag} className="form-check form-switch">
                         <input
                           className="form-check-input"
@@ -229,7 +303,26 @@ export default function Listing({
                           onChange={() => handleTagToggle(tag)}
                         />
                         <label className="form-check-label" htmlFor={`filter-${tag}`}>
-                          {tag}
+                          {tag} <span className="text-muted">({count})</span>
+                        </label>
+                      </div>
+                    ))}
+                    
+                    {/* Article Categories Filter */}
+                    {(normalizedContentType === 'blog' || normalizedContentType === 'blogs' || 
+                      normalizedContentType === 'article' || normalizedContentType === 'articles') && 
+                     allCategories.length > 0 && allCategories.map(({ category, count }) => (
+                      <div key={category} className="form-check form-switch">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          role="switch"
+                          id={`filter-${category}`}
+                          checked={selectedCategories.includes(category)}
+                          onChange={() => handleCategoryToggle(category)}
+                        />
+                        <label className="form-check-label" htmlFor={`filter-${category}`}>
+                          {category} <span className="text-muted">({count})</span>
                         </label>
                       </div>
                     ))}
@@ -238,7 +331,7 @@ export default function Listing({
               </div>
             </div>
           )}
-          <div className={`${filter && (normalizedContentType === 'instructor' || normalizedContentType === 'instructors') && allTags.length > 0 ? 'col-12 col-md-9' : 'col-12'}`}>
+          <div className={`${filter && (allTags.length > 0 || allCategories.length > 0) ? 'col-12 col-md-9' : 'col-12'}`}>
             <div className="row g-4">
               {currentItems.map((item, index) => (
                 <div key={item.sys.id} className={getColumnClass()}>
