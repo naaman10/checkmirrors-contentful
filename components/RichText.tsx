@@ -100,7 +100,7 @@ export default function RichText({ section }: RichTextProps) {
   };
 
   return (
-    <div className="container">
+    <div className="container my-4">
       <div className="row justify-content-center mt-5">
         <div className="col-8">
           <div className={`rich-text-content ${textAlignmentClass}`}>
