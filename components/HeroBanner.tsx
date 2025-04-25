@@ -70,7 +70,7 @@ export default function HeroBanner({ section }: HeroBannerProps) {
         )}
         {subHeading && <p className="lead mb-4">{subHeading}</p>}
         {buttons && buttons.length > 0 && (
-          <div className="d-flex justify-content-center gap-3">
+          <div className="d-grid d-md-block gap-2">
             {buttons.map((button, index) => (
               <CTA key={index} cta={button} />
             ))}
