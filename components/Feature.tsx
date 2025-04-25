@@ -192,7 +192,12 @@ export default function Feature({ section, isEmbedded = false }: FeatureProps) {
               renderContent()
             ) : (
               <div className='card'>
-                <div className='card-body'>
+                <div 
+                  className='card-body'
+                  style={{
+                    padding: '40px',
+                  }}
+                >
                   {renderContent()}
                 </div>
               </div>
