@@ -187,18 +187,34 @@ export default function Card({ item, contentType, columns = '3' }: CardProps) {
     }
 
     case 'testimonials': {
-      const testimonialFields = item.fields as Testimonial['fields'];
-      const imageUrl = getImageUrl(testimonialFields.authorImage as ContentfulImage);
-      const imageAlt = getImageAlt(testimonialFields.authorImage as ContentfulImage) || 'Author image';
+      const testimonialFields = item.fields as {
+        internalName: string;
+        title: string;
+        text: string;
+        passDate: string;
+        pupilImage: Array<{
+          url: string;
+          secure_url: string;
+        }>;
+      };
+      
+      const imageUrl = testimonialFields.pupilImage?.[0]?.secure_url || testimonialFields.pupilImage?.[0]?.url;
+      const imageAlt = testimonialFields.title;
       
       const cardContent = (
         <div className="card-body text-center">
-          <h5 className="card-title">{testimonialFields.authorName}</h5>
-          {testimonialFields.authorTitle && (
-            <h6 className="card-subtitle mb-2 text-muted">{testimonialFields.authorTitle}</h6>
+          <h5 className="card-title">{testimonialFields.title}</h5>
+          {testimonialFields.passDate && (
+            <p className="text-muted mb-3">
+              Passed: {new Date(testimonialFields.passDate).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })}
+            </p>
           )}
           <blockquote className="blockquote mb-0">
-            <p className="card-text">"{testimonialFields.testimonial}"</p>
+            <p className="card-text">{testimonialFields.text}</p>
           </blockquote>
         </div>
       );

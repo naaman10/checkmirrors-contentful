@@ -6,21 +6,15 @@ import { documentToReactComponents } from '@contentful/rich-text-react-renderer'
 import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 import CTA from './CTA';
 import { getCloudinaryUrl, getImageDimensions } from '@/utils/cloudinary';
+import Video from './Video';
+import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 
 interface FeatureProps {
   section: {
     fields: {
       title: any; // Rich text field
       bodyText: any; // Rich text field
-      media?: {
-        fields?: {
-          altText?: string;
-          image?: Array<{
-            url?: string;
-            secure_url?: string;
-          }>;
-        };
-      };
+      media?: Entry<EntrySkeletonType, ChainModifiers>;
       alignment?: 'Left' | 'Right';
       background?: 'Light' | 'Dark';
       cta?: any; // CTA field
@@ -132,8 +126,17 @@ const options = {
 };
 
 export default function Feature({ section, isEmbedded = false }: FeatureProps) {
-  const imageUrl = section.fields.media?.fields?.image?.[0]?.secure_url || 
-                  section.fields.media?.fields?.image?.[0]?.url;
+  const mediaFields = section.fields.media?.fields as {
+    image?: Array<{
+      url?: string;
+      secure_url?: string;
+    }>;
+    altText?: string;
+    youtubeUrl?: string;
+  } | undefined;
+
+  const imageUrl = mediaFields?.image?.[0]?.secure_url || 
+                  mediaFields?.image?.[0]?.url;
   const imagePosition = section.fields.alignment?.toLowerCase() === 'right' ? 'right' : 'left';
   const backgroundColor = isEmbedded ? 'transparent' : (section.fields.background?.toLowerCase() === 'dark' ? 'bg-dark' : 'bg-light');
   const textColor = isEmbedded ? 'text-dark' : (section.fields.background?.toLowerCase() === 'dark' ? 'text-white' : 'text-dark');
@@ -152,18 +155,36 @@ export default function Feature({ section, isEmbedded = false }: FeatureProps) {
     </>
   );
 
+  const renderMedia = () => {
+    if (!section.fields.media) return null;
+
+    const contentType = section.fields.media.sys?.contentType?.sys?.id;
+    
+    if (contentType === 'video' && mediaFields?.youtubeUrl) {
+      return <Video section={section.fields.media} />;
+    }
+
+    if (transformedImageUrl) {
+      return (
+        <img
+          src={transformedImageUrl}
+          alt={mediaFields?.altText || section.fields.title}
+          className="img-fluid"
+          style={{ width: 'auto', height: 'auto' }}
+        />
+      );
+    }
+
+    return null;
+  };
+
   return (
     <section className={`${backgroundColor} py-5`}>
       <div className="container">
         <div className={`row align-items-center ${imagePosition === 'right' ? 'flex-row-reverse' : ''}`}>
-          {transformedImageUrl && (
+          {section.fields.media && (
             <div className="col-md-6 mb-4 mb-md-0">
-              <img
-              src={transformedImageUrl}
-              alt={section.fields.media?.fields?.altText || section.fields.title}
-              className="img-fluid"
-              style={{ width: 'auto', height: 'auto' }}
-              />  
+              {renderMedia()}
             </div>
           )}
           <div className={`col-md-6 ${textColor}`}>
