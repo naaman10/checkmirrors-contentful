@@ -13,8 +13,19 @@ import Video from './Video';
 import RichText from './RichText';
 import { Listings } from './types';
 
+interface FeatureProps {
+  fields: {
+    title: any;
+    bodyText: any;
+    media?: Entry<EntrySkeletonType, ChainModifiers>;
+    alignment?: 'Left' | 'Right';
+    background?: 'Light' | 'Dark';
+    cta?: any;
+  };
+}
+
 interface ContentSectionProps {
-  section: Entry<EntrySkeletonType, ChainModifiers>;
+  section: Entry<any>;
 }
 
 export default function ContentSection({ section }: ContentSectionProps) {
@@ -29,7 +40,7 @@ export default function ContentSection({ section }: ContentSectionProps) {
     case 'componentTextSection':
       return <TextSection section={section} />;
     case 'componentFeature':
-      return <Feature section={section} />;
+      return <Feature section={{ fields: section.fields as FeatureProps['fields'] }} />;
     case 'componentBannerPromotion':
       return <BannerPromotionComponent section={section} />;
     case 'componentCardCardGroup':
@@ -41,23 +52,29 @@ export default function ContentSection({ section }: ContentSectionProps) {
     case 'richText':
       return <RichText section={section} />;
     case 'componentListings': {
-      const listings = section as unknown as Listings;
+      const fields = section.fields as Listings['fields'];
       
-      // Ensure items is an array and not undefined
-      const items = Array.isArray(listings.fields.items) ? listings.fields.items : [];
-      
-      // Ensure pagination has the correct structure
-      const pagination = typeof listings.fields.pagination === 'boolean' 
-        ? { enabled: listings.fields.pagination }
-        : listings.fields.pagination;
+      console.log('ContentSection - Listings fields:', {
+        contentType: fields.contentType,
+        itemsLength: fields.items?.length,
+        items: fields.items?.map(item => ({
+          id: item.sys.id,
+          contentType: item.sys.contentType.sys.id
+        }))
+      });
       
       return <Listing 
-        items={items}
-        contentType={listings.fields.contentType}
-        title={listings.fields.title}
-        subTitle={listings.fields.subTitle}
-        columns={listings.fields.columns}
-        pagination={pagination}
+        items={Array.isArray(fields.items) ? fields.items : []}
+        contentType={fields.contentType || 'blog'}
+        title={fields.title || ''}
+        subTitle={fields.subTitle}
+        columns={typeof fields.columns === 'string' ? fields.columns : undefined}
+        pagination={
+          typeof fields.pagination === 'boolean' 
+            ? { enabled: fields.pagination }
+            : fields.pagination
+        }
+        filter={fields.contentType?.toLowerCase() === 'instructors'}
       />;
     }
     default:

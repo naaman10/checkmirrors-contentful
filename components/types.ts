@@ -160,6 +160,7 @@ export interface Instructor {
     order?: number
     active?: boolean
     internalName?: string
+    tags?: string[]
   }
 }
 
@@ -244,11 +245,12 @@ export interface Listings {
   };
   fields: {
     items: Entry<BlogPost | Instructor | Testimonial>[];
-    contentType: 'blog' | 'instructors' | 'testimonials';
+    contentType: 'blog' | 'instructor' | 'testimonial';
     title?: string;
     subTitle?: string;
-    columns?: number;
+    columns?: string;
     pagination?: boolean;
+    filter?: boolean;
   };
 }
 

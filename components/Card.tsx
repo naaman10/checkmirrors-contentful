@@ -104,7 +104,7 @@ export default function Card({ item, contentType, columns = '3' }: CardProps) {
     return content;
   };
 
-  switch (contentType) {
+  switch (contentType.toLowerCase()) {
     case 'blog':
     case 'pageblogpost':
     case 'articles': {
@@ -150,6 +150,7 @@ export default function Card({ item, contentType, columns = '3' }: CardProps) {
       );
     }
 
+    case 'instructor':
     case 'instructors': {
       const instructorFields = item.fields as Instructor['fields'];
       const imageUrl = getImageUrl(instructorFields.image as ContentfulImage);
@@ -158,13 +159,13 @@ export default function Card({ item, contentType, columns = '3' }: CardProps) {
       const cardContent = (
         <div className="card-body text-center">
           <h5 className="card-title">{instructorFields.name}</h5>
-          <p className="card-text">{instructorFields.bio}</p>
-          {instructorFields.qualifications && (
-            <ul className="list-unstyled">
-              {instructorFields.qualifications.map((qual, index) => (
-                <li key={index} className="text-muted">{qual}</li>
-              ))}
-            </ul>
+          {instructorFields.qualifications && instructorFields.qualifications.length > 0 && (
+            <p className="card-text">
+              {instructorFields.qualifications.join(', ')}
+            </p>
+          )}
+          {instructorFields.bio && (
+            <p className="card-text">{instructorFields.bio}</p>
           )}
         </div>
       );
