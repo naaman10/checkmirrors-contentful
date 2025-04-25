@@ -6,6 +6,7 @@ import Footer from '@/components/Footer'
 import Script from 'next/script'
 import ClientLayout from '@/components/ClientLayout'
 import TermlyScriptLoader from '@/components/TermlyScriptLoader'
+import GoogleAnalyticsLoader from '@/components/GoogleAnalyticsLoader'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,14 +25,15 @@ export default function RootLayout({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <TermlyScriptLoader />
         <Script
           src="https://kit.fontawesome.com/c26d8f910e.js"
           crossOrigin="anonymous"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
-        <TermlyScriptLoader />
       </head>
       <body className={inter.className} suppressHydrationWarning>
+        <GoogleAnalyticsLoader />
         <ClientLayout>
           <Navigation />
           {children}
