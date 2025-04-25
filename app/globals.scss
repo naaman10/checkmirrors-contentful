@@ -5,6 +5,25 @@ $font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
   'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro',
   'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
 
+// Color Variables
+$title-a: #F41822;
+$title-b: #0A9444;
+$primary-color-dark: #0288D1;
+$primary-color: #03A9F4;
+$primary-color-light: #B3E5FC;
+$primary-color-text: #FFFFFF;
+$accent-color: #FFC107;
+$primary-text-color: #212121;
+$secondary-text-color: #757575;
+$divider-color: #BDBDBD;
+$background-light: #F7F9F8;
+$background-dark: #002347;
+$background-grey: #F7F9F8;
+
+// Font Variables
+$font-header: 'Roboto', sans-serif;
+$font-body: 'Roboto', sans-serif;
+
 // Mixins
 @mixin flex-center {
   display: flex;
@@ -28,25 +47,36 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
 }
-@import "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap";
-@import "https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css";
-// Color Variables
-$title-a: #F41822;
-$title-b: #0A9444;
-$primary-color-dark: #0288D1;
-$primary-color: #03A9F4;
-$primary-color-light: #B3E5FC;
-$primary-color-text: #FFFFFF;
-$accent-color: #FFC107;
-$primary-text-color: #212121;
-$secondary-text-color: #757575;
-$divider-color: #BDBDBD;
-$background-light: #F7F9F8;
-$background-dark: #002347;
-$background-grey: #F7F9F8;  
-// Font Variables
-$font-header: 'Roboto', sans-serif;
-$font-body: 'Roboto', sans-serif;
+
+// Header styles
+.header_area {
+  width: 100%;
+  z-index: 999;
+  position: relative;
+  transition: all 0.3s ease;
+
+  &.navbar_fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.35s ease-out;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+// Rest of your custom styles...
+
 /* Custom CSS */
 .bg-dark {
   background-color: $background-dark!important;
