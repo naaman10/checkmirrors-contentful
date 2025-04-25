@@ -93,7 +93,7 @@ export default function CardGroup({ section }: CardGroupProps) {
                       />
                     </div>
                   )}
-                  <div className="card-body">
+                  <div className="card-body d-flex flex-column justify-content-between">
                     <h3 className="card-title h4">{card.fields.title}</h3>
                     <div className="card-text">
                       <ReactMarkdown>{card.fields.text}</ReactMarkdown>

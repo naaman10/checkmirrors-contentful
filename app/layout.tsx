@@ -1,4 +1,4 @@
-import { Inter } from 'next/font/google'
+import { Inter, Roboto } from 'next/font/google'
 import Navigation from '../components/Navigation'
 import './external.scss'
 import './globals.scss'
