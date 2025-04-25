@@ -10,6 +10,11 @@ interface InstructorFormModalProps {
 export default function InstructorFormModal({ isOpen, onClose }: InstructorFormModalProps) {
   useEffect(() => {
     if (isOpen) {
+      // Prevent body scrolling when modal is open
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      
       // Load HubSpot script
       const script = document.createElement('script');
       script.src = '//js.hsforms.net/forms/shell.js';
@@ -29,6 +34,9 @@ export default function InstructorFormModal({ isOpen, onClose }: InstructorFormM
       };
 
       return () => {
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
         document.body.removeChild(script);
       };
     }
@@ -41,20 +49,32 @@ export default function InstructorFormModal({ isOpen, onClose }: InstructorFormM
       className="modal fade show" 
       style={{ 
         display: 'block',
-        zIndex: 1050,
         position: 'fixed',
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%'
+        right: 0,
+        bottom: 0,
+        zIndex: 1050,
+        overflow: 'auto'
       }} 
       tabIndex={-1}
     >
       <div 
         className="modal-dialog modal-dialog-centered"
-        style={{ zIndex: 1051 }}
+        style={{ 
+          margin: 'auto',
+          display: 'block',
+          height: '100%',
+          overflow: 'auto',
+          zIndex: 1051
+        }}
       >
-        <div className="modal-content">
+        <div 
+        className="modal-content"
+        style={{
+          minHeight: '100%'
+        }}
+        >
           <div className="modal-header">
             <h5 className="modal-title">Become an Instructor</h5>
             <button type="button" className="btn-close" onClick={onClose} aria-label="Close"></button>
@@ -66,7 +86,14 @@ export default function InstructorFormModal({ isOpen, onClose }: InstructorFormM
       </div>
       <div 
         className="modal-backdrop fade show"
-        style={{ zIndex: 1049 }}
+        style={{ 
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 1049
+        }}
       ></div>
     </div>
   );

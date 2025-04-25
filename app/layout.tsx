@@ -1,11 +1,10 @@
-'use client'
-
 import { Inter } from 'next/font/google'
 import Navigation from '../components/Navigation'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './globals.scss'
 import Footer from '@/components/Footer'
 import Script from 'next/script'
+import ClientLayout from '@/components/ClientLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,6 +16,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Script
           src="https://kit.fontawesome.com/c26d8f910e.js"
           crossOrigin="anonymous"
@@ -24,9 +25,11 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className} suppressHydrationWarning>
-        <Navigation />
-        {children}
-        <Footer />
+        <ClientLayout>
+          <Navigation />
+          {children}
+          <Footer />
+        </ClientLayout>
       </body>
     </html>
   )
