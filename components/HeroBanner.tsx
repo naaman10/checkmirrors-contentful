@@ -58,7 +58,7 @@ export default function HeroBanner({ section }: HeroBannerProps) {
           zIndex: 1
         }}
       />
-      <div className="container position-relative z-2 text-center">
+      <div className="container position-relative z-1 text-center">
         {size === '100' ? (
           <h1 className="mb-3">
             <span className="title-a">check</span>

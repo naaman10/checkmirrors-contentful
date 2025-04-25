@@ -54,7 +54,7 @@ export default function InstructorFormModal({ isOpen, onClose }: InstructorFormM
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: 1050,
+        zIndex: 9998,
         overflow: 'auto'
       }} 
       tabIndex={-1}
@@ -66,7 +66,7 @@ export default function InstructorFormModal({ isOpen, onClose }: InstructorFormM
           display: 'block',
           height: '100%',
           overflow: 'auto',
-          zIndex: 1051
+          zIndex: 9999
         }}
       >
         <div 

@@ -439,6 +439,17 @@ label.error {
 	height: 100%;
 }
 @media screen and (max-width: 480px) {
+  .header_area {
+    position: absolute;
+    top: 0;
+    left: auto;
+    display: block;
+    z-index: 2;
+    width: 100%;
+    .navbar {
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+  }
   .nav-item .btn {
     width: 100%;
     margin: 5px;
@@ -505,6 +516,27 @@ label.error {
       h2 {
         margin-bottom: 0;
       }
+    }
+    .navbar-toggler {
+      border: none;
+      border-radius: 0px;
+      padding: 0px;
+      cursor: pointer;
+      margin-top: 27px;
+      margin-bottom: 23px;
+      display: block;
+
+      .icon-bar {
+        display: block;
+        width: 25px;
+        height: 3px;
+        background: #fdc632;
+        margin: auto;
+        margin-bottom: 4px;
+        transition: all 400ms linear;
+        cursor: pointer;
+      }
+      
     }
   }
   .header_area.navbar_fixed .main_menu {

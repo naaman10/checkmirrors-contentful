@@ -133,9 +133,9 @@ export default function Navigation() {
   }
 
   return (
+    <div className="header_area">
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
-      <div className="container">
-        <div className="d-flex w-100 align-items-center">
+      <div className="container-fluid">
           <a className="navbar-brand me-auto" href="/">
             <h2><span className="title-a">check</span><span className="title-b">mirrors</span><span className="title-tagline"> School of Motoring</span></h2>
           </a>
@@ -146,7 +146,9 @@ export default function Navigation() {
             aria-expanded={isOpen}
             aria-label="Toggle navigation"
           >
-            <span className="navbar-toggler-icon"></span>
+            <span className="icon-bar"></span>
+            <span className="icon-bar"></span>
+            <span className="icon-bar"></span>
           </button>
           <div className={`collapse navbar-collapse ${isOpen ? 'show' : ''}`}>
             <ul className="navbar-nav ms-auto">
@@ -193,13 +195,14 @@ export default function Navigation() {
               })}
             </ul>
             {navigationData.fields.cta && (
-              <div className="ms-3">
+              <div className="d-grid d-md-block gap-2">
                 <CTA cta={navigationData.fields.cta} />
               </div>
             )}
           </div>
-        </div>
+
       </div>
     </nav>
+    </div>
   );
 } 
