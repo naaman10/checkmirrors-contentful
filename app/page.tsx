@@ -20,12 +20,8 @@ interface PageContent {
 
 async function getHomepageContent() {
   // Log environment variables for debugging
-  console.log('Checking environment variables...');
   const spaceId = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID;
   const accessToken = process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN;
-  
-  console.log('Space ID:', spaceId ? 'Present' : 'Missing');
-  console.log('Access Token:', accessToken ? 'Present' : 'Missing');
 
   // Validate environment variables
   if (!spaceId) {
@@ -84,7 +80,6 @@ export default async function Home() {
       </main>
     );
   } catch (error) {
-    console.error('Error in Home component:', error);
     return <main>Error loading content: {error instanceof Error ? error.message : 'Unknown error'}</main>;
   }
 } 

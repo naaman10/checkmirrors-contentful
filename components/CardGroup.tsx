@@ -10,10 +10,7 @@ interface CardGroupProps {
 }
 
 export default function CardGroup({ section }: CardGroupProps) {
-  if (!section?.fields) {
-    console.warn('Invalid section data in CardGroup component');
-    return null;
-  }
+
 
   const { title, subTitle, cards = [], columns = '3', background = 'Light' } = section.fields as {
     title: string;
@@ -46,7 +43,6 @@ export default function CardGroup({ section }: CardGroupProps) {
     background?: string;
   };
 
-  console.log('CardGroup props:', { title, subTitle, cards: cards?.length, columns, background });
   
   const getGridClasses = (cols: string) => {
     switch (cols) {
@@ -64,7 +60,6 @@ export default function CardGroup({ section }: CardGroupProps) {
   };
 
   const gridClass = getGridClasses(columns);
-  console.log('Grid class:', gridClass);
 
   return (
     <section className={`py-5 ${background === 'Dark' ? 'bg-dark text-white' : 'bg-light text-dark'}`}>
@@ -76,7 +71,6 @@ export default function CardGroup({ section }: CardGroupProps) {
         
         <div className="row g-4 justify-content-center">
           {cards.map((card, index) => {
-            console.log('Rendering card:', index, card);
             const imageUrl = card.fields.cardImage?.fields?.image?.[0]?.secure_url || 
                            card.fields.cardImage?.fields?.image?.[0]?.url;
             const altText = card.fields.cardImage?.fields?.altText || '';

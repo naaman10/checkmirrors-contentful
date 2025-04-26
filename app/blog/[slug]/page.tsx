@@ -80,8 +80,6 @@ async function getBlogPost(slug: string) {
     throw new Error('Blog post not found');
   }
 
-  // Log the available fields to help debug
-  console.log('Available fields:', Object.keys(response.items[0].fields));
 
   return response.items[0] as unknown as BlogPost;
 }
@@ -115,7 +113,6 @@ const options = {
       </a>
     ),
     [BLOCKS.EMBEDDED_ENTRY]: (node: any) => {
-      console.log('Embedded entry node:', JSON.stringify(node, null, 2));
       
       if (!node.data.target) {
         console.warn('No target found in embedded entry');
@@ -123,7 +120,6 @@ const options = {
       }
 
       const contentType = node.data.target.sys.contentType.sys.id;
-      console.log('Embedded entry content type:', contentType);
       
       switch (contentType) {
         case 'image':

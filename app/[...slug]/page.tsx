@@ -34,33 +34,10 @@ const client = createClient({
   accessToken: process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN!,
 });
 
-// Function to log available content types
-async function logContentTypes() {
-  try {
-    const contentTypes = await client.getContentTypes();
-    console.log('Available content types:', contentTypes.items.map(ct => ({
-      id: ct.sys.id,
-      name: ct.name,
-      displayField: ct.displayField
-    })));
-  } catch (error) {
-    console.error('Error fetching content types:', error);
-  }
-}
-
 export async function getPageContent(slug: string | string[]): Promise<PageContent> {
-  // If slug is an array, join it into a string
   const fullPath = Array.isArray(slug) ? slug.join('/') : slug;
-  console.log('Fetching page content for slug:', fullPath);
 
   try {
-    // Log available content types
-    const contentTypes = await client.getContentTypes();
-    console.log('Available content types:', contentTypes.items.map(type => ({
-      id: type.sys.id,
-      name: type.name
-    })));
-
     if (fullPath === 'home') {
       try {
         const homepage = await client.getEntry<PageEntry>('3vrx9Ezv34q2B8pY0kjP25', {
@@ -72,48 +49,19 @@ export async function getPageContent(slug: string | string[]): Promise<PageConte
           content: Array.isArray(homepage.fields.content) ? homepage.fields.content : [],
         };
       } catch (error) {
-        console.error('Error fetching homepage:', error);
         notFound();
       }
     }
 
-    // Get all page entries
     const allEntries = await client.getEntries<PageEntry>({
       include: 3,
       content_type: 'pageLanding'
     });
 
-    console.log('Total entries found:', allEntries.items.length);
-    console.log('First entry sample:', {
-      id: allEntries.items[0]?.sys?.id,
-      contentType: allEntries.items[0]?.sys?.contentType?.sys?.id,
-      fields: allEntries.items[0]?.fields
-    });
-
-    // Log all entries with their relationships
-    const entriesWithRelationships = allEntries.items.map(entry => ({
-      id: entry.sys.id,
-      slug: entry.fields?.slug,
-      parentSlug: entry.fields?.pageParent?.fields?.slug,
-      fullPath: entry.fields?.pageParent?.fields?.slug ? 
-        `${entry.fields.pageParent.fields.slug}/${entry.fields.slug}` : 
-        entry.fields?.slug
-    }));
-    console.log('All entries with relationships:', entriesWithRelationships);
-
-    // Try to get the entry directly by ID if we know it
     if (fullPath === 'driving-lessons-york/what-you-need') {
       try {
         const entry = await client.getEntry<PageEntry>('5KWjMlZQHcfo3cWu2Wo8W9', {
           include: 3,
-        });
-        console.log('Found entry by ID:', {
-          id: entry.sys.id,
-          slug: entry.fields.slug,
-          parentSlug: entry.fields?.pageParent?.fields?.slug,
-          fullPath: entry.fields?.pageParent?.fields?.slug ? 
-            `${entry.fields.pageParent.fields.slug}/${entry.fields.slug}` : 
-            entry.fields.slug
         });
         return {
           title: entry.fields.title,
@@ -122,17 +70,12 @@ export async function getPageContent(slug: string | string[]): Promise<PageConte
           parentSlug: entry.fields?.pageParent?.fields?.slug
         };
       } catch (error) {
-        console.error('Error fetching entry by ID:', error);
+        // Continue to next search method
       }
     }
 
-    // First try to find a direct match
     const directMatch = allEntries.items.find(entry => entry.fields?.slug === fullPath);
     if (directMatch) {
-      console.log('Found direct match:', {
-        id: directMatch.sys.id,
-        slug: directMatch.fields.slug
-      });
       return {
         title: directMatch.fields.title,
         slug: directMatch.fields.slug,
@@ -141,29 +84,15 @@ export async function getPageContent(slug: string | string[]): Promise<PageConte
       };
     }
 
-    // If no direct match, look for a child page
     const childMatch = allEntries.items.find(entry => {
       const entrySlug = entry.fields?.slug;
       const entryParentSlug = entry.fields?.pageParent?.fields?.slug;
       
       if (!entryParentSlug) return false;
-
-      const entryFullPath = `${entryParentSlug}/${entrySlug}`;
-      console.log('Checking child page:', {
-        entryFullPath,
-        requestedPath: fullPath,
-        matches: entryFullPath === fullPath
-      });
-      return entryFullPath === fullPath;
+      return `${entryParentSlug}/${entrySlug}` === fullPath;
     });
 
     if (childMatch) {
-      console.log('Found child page match:', {
-        id: childMatch.sys.id,
-        slug: childMatch.fields.slug,
-        parentSlug: childMatch.fields?.pageParent?.fields?.slug,
-        fullPath: `${childMatch.fields?.pageParent?.fields?.slug}/${childMatch.fields.slug}`
-      });
       return {
         title: childMatch.fields.title,
         slug: childMatch.fields.slug,
@@ -172,117 +101,75 @@ export async function getPageContent(slug: string | string[]): Promise<PageConte
       };
     }
 
-    console.error(`Page not found for slug: ${fullPath}`);
-    console.error('Available paths:', entriesWithRelationships);
     notFound();
   } catch (error) {
-    console.error('Error fetching page:', error);
     notFound();
   }
 }
 
 export async function generateStaticParams() {
   try {
-    // Get all page entries
     const entries = await client.getEntries<PageEntry>({
       include: 3,
       content_type: 'pageLanding'
     });
 
-    console.log('Total entries received:', entries.items.length);
-
-    // Process all entries to generate paths
     const paths = entries.items
-      .filter(entry => {
-        // Only process entries that have a valid slug
-        const hasValidSlug = !!entry?.fields?.slug;
-        if (!hasValidSlug) {
-          console.log('Skipping entry with invalid slug:', entry?.sys?.id);
-          return false;
-        }
-        return true;
-      })
+      .filter(entry => !!entry?.fields?.slug)
       .map(entry => {
-        try {
-          const entrySlug = entry.fields.slug;
-          const parentSlug = entry.fields?.pageParent?.fields?.slug;
+        const entrySlug = entry.fields.slug;
+        const parentSlug = entry.fields?.pageParent?.fields?.slug;
 
-          // If the page has a parent, create the full path as an array
-          if (parentSlug) {
-            const fullPath = `${parentSlug}/${entrySlug}`;
-            console.log('Creating child page path:', {
-              parentSlug,
-              childSlug: entrySlug,
-              fullPath
-            });
-            return {
-              slug: fullPath.split('/')  // Split the path into an array
-            };
-          }
-
-          // Otherwise just use the page's slug
-          console.log('Creating direct page path:', {
-            slug: entrySlug
-          });
+        if (parentSlug) {
           return {
-            slug: [entrySlug]  // Wrap single slug in array
+            slug: `${parentSlug}/${entrySlug}`.split('/')
           };
-        } catch (error) {
-          console.error('Error processing entry for path:', error);
-          return null;
         }
+
+        return {
+          slug: [entrySlug]
+        };
       })
       .filter(Boolean);
 
-    // Add homepage to static params
-    const allPaths = [...paths, { slug: ['home'] }];
-    console.log('Generated static paths:', allPaths);
-    return allPaths;
+    return [...paths, { slug: ['home'] }];
   } catch (error) {
-    console.error('Error generating static params:', error);
-    // Return at least the homepage to ensure the site doesn't break
     return [{ slug: ['home'] }];
   }
 }
 
 export async function generateMetadata({ params }: { params: { slug: string[] } }) {
-  const fullPath = params.slug.join('/');
-  const page = await getPageContent(fullPath);
-  
-  return {
-    title: page.title,
-  };
+  try {
+    const fullPath = params.slug.join('/');
+    const page = await getPageContent(fullPath);
+    
+    return {
+      title: page.title,
+    };
+  } catch (error) {
+    return {
+      title: 'Page Not Found'
+    };
+  }
 }
 
-async function getPageData(slug: string[]) {
-  const fullPath = slug.join('/');
-  console.log('getPageData - fullPath:', fullPath);
-  return await getPageContent(fullPath);
-}
-
-// Add dynamic configuration
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function Page({ params }: { params: { slug: string[] } }) {
-  const fullPath = params.slug.join('/');
-  console.log('Page component - fullPath:', fullPath);
-  const page = await getPageData(params.slug);
+  try {
+    const fullPath = params.slug.join('/');
+    const page = await getPageContent(fullPath);
 
-  console.log('Page content:', {
-    title: page.title,
-    slug: page.slug,
-    parentSlug: page.parentSlug,
-    contentLength: page.content?.length || 0,
-    contentTypes: page.content?.map(section => section.sys.contentType.sys.id) || []
-  });
-
-  return (
-    <main>
-      <h1 className="sr-only">{page.title}</h1>
-      {page.content?.map((section, index) => (
-        <ContentSection key={index} section={section} />
-      ))}
-    </main>
-  );
+    return (
+      <main>
+        <h1 className="sr-only">{page.title}</h1>
+        {page.content?.map((section, index) => (
+          <ContentSection key={index} section={section} />
+        ))}
+      </main>
+    );
+  } catch (error) {
+    notFound();
+  }
 } 

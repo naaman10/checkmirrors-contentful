@@ -151,7 +151,7 @@ export default function Navigation() {
             <span className="icon-bar"></span>
           </button>
           <div className={`collapse navbar-collapse ${isOpen ? 'show' : ''}`}>
-            <ul className="navbar-nav ms-auto">
+            <ul className="navbar-nav ms-auto mr-3">
               {navigationData.fields.menu.map((item) => {
                 const fields = item.fields as any;
                 const hasSubMenuItems = subMenuItems[item.sys.id]?.length > 0;
