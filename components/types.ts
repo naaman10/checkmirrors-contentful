@@ -145,7 +145,7 @@ export interface BlogPost {
     };
     content: string;
     excerpt?: string;
-    category: string;
+    category: string[];
   };
   sys: {
     id: string;

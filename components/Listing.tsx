@@ -49,24 +49,11 @@ export default function Listing({
   // Normalize the content type to lowercase for consistent comparison
   const normalizedContentType = contentType?.toLowerCase();
   
-  console.log('Listing component initialized with:', {
-    contentType,
-    normalizedContentType,
-    initialItems: initialItems?.length || 0,
-    hasInitialItems: !!initialItems,
-    initialItemsType: typeof initialItems,
-    spaceId: process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID?.slice(0, 5) + '...',
-    hasAccessToken: !!process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN,
-    mappedContentType: contentTypeMap[contentType] || contentTypeMap[normalizedContentType]
-  });
-
   const [items, setItems] = useState<Entry<EntrySkeletonType, ChainModifiers>[]>(() => {
     // Only initialize with initialItems if it's a valid array
     if (Array.isArray(initialItems) && initialItems.length > 0) {
-      console.log('Initializing items with initialItems:', initialItems.length);
       return initialItems;
     }
-    console.log('Initializing items with empty array');
     return [];
   });
   const [loading, setLoading] = useState(() => !Array.isArray(initialItems) || initialItems.length === 0);
@@ -79,7 +66,6 @@ export default function Listing({
     const fetchItems = async () => {
       // Only skip fetch if we have valid initialItems
       if (Array.isArray(initialItems) && initialItems.length > 0) {
-        console.log('Using initial items, skipping fetch:', initialItems.length);
         return;
       }
 
@@ -95,12 +81,6 @@ export default function Listing({
 
         // Get the mapped content type ID
         const mappedContentType = contentTypeMap[contentType] || contentTypeMap[normalizedContentType];
-        console.log('Content type mapping:', {
-          input: contentType,
-          normalizedInput: normalizedContentType,
-          mapped: mappedContentType,
-          availableMappings: Object.keys(contentTypeMap)
-        });
 
         if (!mappedContentType) {
           throw new Error(`Unknown content type: ${contentType}`);
@@ -118,16 +98,7 @@ export default function Listing({
           query.order = 'fields.order';
         }
 
-        console.log('Fetching with query:', query);
         const response = await client.getEntries(query);
-        console.log('Contentful response:', {
-          total: response.total,
-          items: response.items.map(item => ({
-            id: item.sys.id,
-            contentType: item.sys.contentType.sys.id,
-            fields: Object.keys(item.fields)
-          }))
-        });
 
         setItems(response.items);
         setLoading(false);
@@ -165,10 +136,13 @@ export default function Listing({
         normalizedContentType !== 'article' && normalizedContentType !== 'articles') return [];
     
     const categoryCounts = items.reduce((acc, item) => {
-      const category = (item.fields as BlogPost['fields']).category;
-      if (category) {
-        acc[category] = (acc[category] || 0) + 1;
-      }
+      const fields = item.fields as BlogPost['fields'];
+      const categories = fields.category || [];
+      categories.forEach(category => {
+        if (category) {
+          acc[category] = (acc[category] || 0) + 1;
+        }
+      });
       return acc;
     }, {} as Record<string, number>);
     
@@ -191,23 +165,12 @@ export default function Listing({
     if ((normalizedContentType === 'blog' || normalizedContentType === 'blogs' || 
          normalizedContentType === 'article' || normalizedContentType === 'articles') && 
         selectedCategories.length > 0) {
-      console.log('Filtering articles by categories:', {
-        selectedCategories,
-        totalItems: items.length
-      });
-      
-      const filtered = items.filter(item => {
+      return items.filter(item => {
         const fields = item.fields as BlogPost['fields'];
-        console.log('Checking article:', {
-          id: item.sys.id,
-          category: fields.category,
-          matches: selectedCategories.includes(fields.category)
-        });
-        return selectedCategories.includes(fields.category);
+        const categories = fields.category || [];
+        if (categories.length === 0) return false;
+        return selectedCategories.some(cat => categories.includes(cat));
       });
-      
-      console.log('Filtered articles:', filtered.length);
-      return filtered;
     }
 
     return items;
@@ -246,11 +209,6 @@ export default function Listing({
   }
 
   if (!items || items.length === 0) {
-    console.warn('No items found for content type:', contentType, {
-      itemsLength: items?.length,
-      isLoading: loading,
-      hasError: !!error
-    });
     return null;
   }
 

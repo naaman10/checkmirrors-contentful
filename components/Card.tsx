@@ -29,14 +29,8 @@ interface ContentfulImage {
 export default function Card({ item, contentType, columns = '3' }: CardProps) {
   if (!item.fields) return null;
 
-  console.log('Card rendering for type:', contentType);
-  console.log('Item fields:', JSON.stringify(item.fields, null, 2));
-
   const getImageUrl = (imageData: ContentfulImage | null | undefined) => {
-    if (!imageData?.fields) {
-      console.log('No valid image data:', imageData);
-      return null;
-    }
+    if (!imageData?.fields) return null;
 
     // Handle the new structure (file.url)
     if (imageData.fields.file?.url) {
@@ -48,7 +42,6 @@ export default function Card({ item, contentType, columns = '3' }: CardProps) {
       return imageData.fields.image[0].secure_url || imageData.fields.image[0].url;
     }
 
-    console.log('No valid image URL found in:', imageData);
     return null;
   };
 
@@ -238,7 +231,6 @@ export default function Card({ item, contentType, columns = '3' }: CardProps) {
     }
 
     default:
-      console.warn(`Unknown content type: ${contentType}`);
       return null;
   }
 } 
