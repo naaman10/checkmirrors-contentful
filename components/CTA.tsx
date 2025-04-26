@@ -9,8 +9,7 @@ interface CTAProps {
 }
 
 export default function CTA({ cta }: CTAProps) {
-
-
+  if (!cta) return null;
 
   // Check the content type ID to determine which type of CTA it is
   const isLink = cta.sys.contentType.sys.id === 'componentCtaLink';

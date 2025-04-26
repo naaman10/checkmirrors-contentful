@@ -8,6 +8,7 @@ import CTA from './CTA';
 import { getCloudinaryUrl, getImageDimensions } from '@/utils/cloudinary';
 import Video from './Video';
 import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
+import HubspotForm from './HubspotForm';
 
 interface FeatureProps {
   section: {
@@ -18,6 +19,7 @@ interface FeatureProps {
       alignment?: 'Left' | 'Right';
       background?: 'Light' | 'Dark';
       cta?: any; // CTA field
+      form?: 'Contact' | 'Instructor' | 'None';
     };
   };
   isEmbedded?: boolean;
@@ -156,6 +158,24 @@ export default function Feature({ section, isEmbedded = false }: FeatureProps) {
   );
 
   const renderMedia = () => {
+    if (section.fields.form === 'Contact') {
+      return (
+        <>
+          <div id="hubspot-form" className={isDarkBackground ? 'card p-4' : ''} />
+          <HubspotForm formType="Contact" isDarkBackground={isDarkBackground} />
+        </>
+      );
+    }
+    
+    if (section.fields.form === 'Instructor') {
+      return (
+        <>
+          <div id="hubspot-form" className={isDarkBackground ? 'card p-4' : ''} />
+          <HubspotForm formType="Instructor" isDarkBackground={isDarkBackground} />
+        </>
+      );
+    }
+
     if (!section.fields.media) return null;
 
     const contentType = section.fields.media.sys?.contentType?.sys?.id;
