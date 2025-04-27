@@ -220,17 +220,12 @@ section h2 {
 .header_area.navbar_fixed .title-tagline {
   color: black;
 }
-.navbar .nav .nav-item .nav-link {
+.nav-item .nav-link {
   text-transform: uppercase;
-}
-.navbar_fixed .navbar .nav .nav-item .nav-link {
   color: black;
+  font-weight: 500;
 }
-.navbar_fixed .navbar .nav .nav-item .nav-link:hover {
-  color: #fdc632;
-  cursor: pointer;
-}
- .navbar .nav .nav-item .nav-link:hover {
+.nav-item .nav-link:hover {
   color: #fdc632;
   cursor: pointer;
 }

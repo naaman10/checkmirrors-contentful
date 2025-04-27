@@ -135,7 +135,7 @@ export default function Navigation() {
   return (
     <div className="header_area">
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
-      <div className="container-fluid">
+      <div className="container">
           <a className="navbar-brand me-auto" href="/">
             <h2><span className="title-a">check</span><span className="title-b">mirrors</span><span className="title-tagline"> School of Motoring</span></h2>
           </a>
@@ -150,8 +150,8 @@ export default function Navigation() {
             <span className="icon-bar"></span>
             <span className="icon-bar"></span>
           </button>
-          <div className={`collapse navbar-collapse ${isOpen ? 'show' : ''}`}>
-            <ul className="navbar-nav ms-auto mr-3">
+          <div className={`collapse navbar-collapse offset justify-content-end ${isOpen ? 'show' : ''}`}>
+            <ul className="navbar-nav menu_nav ml-auto align-items-center">
               {navigationData.fields.menu.map((item) => {
                 const fields = item.fields as any;
                 const hasSubMenuItems = subMenuItems[item.sys.id]?.length > 0;
