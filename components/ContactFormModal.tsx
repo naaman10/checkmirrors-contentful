@@ -60,7 +60,7 @@ export default function ContactFormModal({ isOpen, onClose }: ContactFormModalPr
       tabIndex={-1}
     >
       <div 
-        className="modal-dialog modal-dialog-centered modal-xl"
+        className="modal-dialog modal-fullscreen"
         style={{ 
           margin: 'auto',
           display: 'block',
@@ -83,17 +83,6 @@ export default function ContactFormModal({ isOpen, onClose }: ContactFormModalPr
           </div>
         </div>
       </div>
-      <div 
-        className="modal-backdrop fade show"
-        style={{ 
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 1049
-        }}
-      ></div>
     </div>
   );
 } 
