@@ -9,6 +9,7 @@ import { getCloudinaryUrl, getImageDimensions } from '@/utils/cloudinary';
 import Video from './Video';
 import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 import HubspotForm from './HubspotForm';
+import ListItem from './ListItem';
 
 interface FeatureProps {
   section: {
@@ -67,6 +68,17 @@ const options = {
       });
       return <li className="">{processedChildren}</li>;
     },
+    [BLOCKS.EMBEDDED_ENTRY]: (node: any) => {
+      const entry = node.data.target;
+      const contentType = entry.sys.contentType.sys.id;
+
+      if (contentType === 'componentListItem') {
+        return <ListItem section={entry} isInline={false} />;
+      }
+
+      console.warn(`Unsupported block embedded content type: ${contentType}`);
+      return null;
+    },
     [INLINES.HYPERLINK]: (node: any, children: any) => (
       <a href={node.data.uri} className="text-primary" target="_blank" rel="noopener noreferrer">
         {children}
@@ -102,6 +114,10 @@ const options = {
             />
           </div>
         );
+      }
+
+      if (contentType === 'componentListItem') {
+        return <ListItem section={entry} isInline={true} />;
       }
 
       console.warn(`Unsupported inline embedded content type: ${contentType}`);

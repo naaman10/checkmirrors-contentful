@@ -1,3 +1,4 @@
+import React from 'react';
 import { createClient } from 'contentful';
 import Image from 'next/image';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
@@ -5,6 +6,7 @@ import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 import { getCloudinaryUrl, getImageDimensions } from '@/utils/cloudinary';
 import HeroBanner from '@/components/HeroBanner';
 import Feature from '@/components/Feature';
+import ListItem from '@/components/ListItem';
 
 interface BlogPost {
   sys: {
@@ -86,9 +88,39 @@ async function getBlogPost(slug: string) {
 
 const options = {
   renderNode: {
-    [BLOCKS.PARAGRAPH]: (node: any, children: any) => (
-      <p className="mb-4">{children}</p>
-    ),
+    [BLOCKS.PARAGRAPH]: (node: any, children: any) => {
+      // Check if any of the children are block-level components or elements
+      const hasBlockElements = React.Children.toArray(children).some(
+        child => {
+          if (!React.isValidElement(child)) return false;
+          
+          // Check for block HTML elements
+          if (typeof child.type === 'string' && 
+              ['div', 'section', 'article', 'header', 'footer', 'nav', 'aside'].includes(child.type)) {
+            return true;
+          }
+          
+          // Check for custom components that render block elements
+          // ListItem component when inline uses span with inline-block, but we still want to break out
+          if (child.type && typeof child.type === 'function') {
+            const componentName = child.type.displayName || child.type.name;
+            if (componentName === 'ListItem') {
+              return true;
+            }
+          }
+          
+          return false;
+        }
+      );
+
+      // If there are block elements, render without a paragraph wrapper to avoid nesting errors
+      if (hasBlockElements) {
+        return <>{children}</>;
+      }
+
+      // Otherwise, render as a normal paragraph
+      return <p className="mb-4">{children}</p>;
+    },
     [BLOCKS.HEADING_1]: (node: any, children: any) => (
       <h1 className="display-4 mb-4">{children}</h1>
     ),
@@ -112,6 +144,24 @@ const options = {
         {children}
       </a>
     ),
+    [INLINES.EMBEDDED_ENTRY]: (node: any) => {
+      if (!node.data.target) {
+        console.warn('No target found in inline embedded entry');
+        return null;
+      }
+
+      const contentType = node.data.target.sys.contentType.sys.id;
+      
+      switch (contentType) {
+        case 'componentListItem': {
+          const listItem = node.data.target;
+          return <ListItem section={listItem} isInline={true} />;
+        }
+        default:
+          console.warn(`Unsupported inline embedded content type: ${contentType}`);
+          return null;
+      }
+    },
     [BLOCKS.EMBEDDED_ENTRY]: (node: any) => {
       
       if (!node.data.target) {
@@ -159,6 +209,11 @@ const options = {
           const feature = node.data.target;
           console.log('Feature component data:', JSON.stringify(feature, null, 2));
           return <Feature section={feature} isEmbedded={true} />;
+        }
+        case 'componentListItem': {
+          const listItem = node.data.target;
+          console.log('ListItem component data:', JSON.stringify(listItem, null, 2));
+          return <ListItem section={listItem} isInline={false} />;
         }
         default:
           console.warn(`Unsupported embedded content type: ${contentType}`);

@@ -6,6 +6,7 @@ import { BLOCKS, INLINES } from '@contentful/rich-text-types';
 import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 import Video from './Video';
 import Image from 'next/image';
+import ListItem from './ListItem';
 
 interface RichTextProps {
   section: Entry<EntrySkeletonType, ChainModifiers>;
@@ -67,6 +68,8 @@ export default function RichText({ section }: RichTextProps) {
                 />
               </div>
             );
+          case 'componentListItem':
+            return <ListItem section={node.data.target} isInline={false} />;
           default:
             console.warn(`Unsupported embedded content type: ${contentType}`);
             return null;
@@ -91,6 +94,8 @@ export default function RichText({ section }: RichTextProps) {
                 style={{ display: 'inline-block' }}
               />
             );
+          case 'componentListItem':
+            return <ListItem section={node.data.target} isInline={true} />;
           default:
             console.warn(`Unsupported embedded content type: ${contentType}`);
             return null;

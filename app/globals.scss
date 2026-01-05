@@ -224,10 +224,14 @@ section h2 {
   text-transform: uppercase;
   color: black;
   font-weight: 500;
+  font-size: 13px;
 }
 .nav-item .nav-link:hover {
   color: #fdc632;
   cursor: pointer;
+}
+.navbar-nav {
+  margin-right: 2rem;
 }
 .nav-link i.fas.fa-caret-down {
     margin-left: 10px;

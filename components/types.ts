@@ -278,4 +278,32 @@ export interface BannerPromotion {
     cta?: CTA;
     background: string;
   };
+}
+
+export interface ComponentListItem {
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: 'componentListItem';
+      };
+    };
+  };
+  fields: {
+    entryName: string;
+    itemTitle?: string;
+    itemText?: any; // RichText field
+    itemImage?: {
+      fields?: {
+        image?: Array<{
+          url?: string;
+          secure_url?: string;
+        }>;
+        altText?: string;
+      };
+    };
+    imageAltText?: string;
+    itemLink?: string;
+    openInNewTab?: boolean;
+  };
 } 
