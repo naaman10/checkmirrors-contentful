@@ -119,17 +119,8 @@ export default function Navigation() {
     }));
   };
 
-  if (loading) {
-    return <div>Loading navigation...</div>;
-  }
   if (error) {
     return <div className="alert alert-danger">Error: {error}</div>;
-  }
-  if (!navigationData) {
-    return null;
-  }
-  if (!navigationData.fields?.menu) {
-    return <div>No navigation items found</div>;
   }
 
   return (
@@ -151,53 +142,57 @@ export default function Navigation() {
             <span className="icon-bar"></span>
           </button>
           <div className={`collapse navbar-collapse offset justify-content-end ${isOpen ? 'show' : ''}`}>
-            <ul className="navbar-nav menu_nav ml-auto align-items-center">
-              {navigationData.fields.menu.map((item) => {
-                const fields = item.fields as any;
-                const hasSubMenuItems = subMenuItems[item.sys.id]?.length > 0;
+            {!loading && navigationData && navigationData.fields?.menu && (
+              <>
+                <ul className="navbar-nav menu_nav ml-auto align-items-center">
+                  {navigationData.fields.menu.map((item) => {
+                    const fields = item.fields as any;
+                    const hasSubMenuItems = subMenuItems[item.sys.id]?.length > 0;
 
-                if (hasSubMenuItems) {
-                  return (
-                    <li key={item.sys.id} className="nav-item dropdown">
-                      <a
-                        className="nav-link dropdown-toggle"
-                        href="#"
-                        role="button"
-                        data-bs-toggle="dropdown" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          toggleDropdown(item.sys.id);
-                        }}
-                        aria-expanded={openDropdowns[item.sys.id]}
-                      >
-                        {fields.label}
-                      </a>
-                      <ul className={`dropdown-menu ${openDropdowns[item.sys.id] ? 'show' : ''}`}>
-                        {subMenuItems[item.sys.id]?.map((subItem) => (
-                          <li key={subItem.sys.id}>
-                            <a className="dropdown-item" href={subItem.fields.url}>
-                              {subItem.fields.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  );
-                }
+                    if (hasSubMenuItems) {
+                      return (
+                        <li key={item.sys.id} className="nav-item dropdown">
+                          <a
+                            className="nav-link dropdown-toggle"
+                            href="#"
+                            role="button"
+                            data-bs-toggle="dropdown" 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              toggleDropdown(item.sys.id);
+                            }}
+                            aria-expanded={openDropdowns[item.sys.id]}
+                          >
+                            {fields.label}
+                          </a>
+                          <ul className={`dropdown-menu ${openDropdowns[item.sys.id] ? 'show' : ''}`}>
+                            {subMenuItems[item.sys.id]?.map((subItem) => (
+                              <li key={subItem.sys.id}>
+                                <a className="dropdown-item" href={subItem.fields.url}>
+                                  {subItem.fields.label}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      );
+                    }
 
-                return (
-                  <li key={item.sys.id} className="nav-item">
-                    <a href={fields.url} className="nav-link">
-                      {fields.label}
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-            {navigationData.fields.cta && (
-              <div className="d-grid d-md-block gap-2">
-                <CTA cta={navigationData.fields.cta} />
-              </div>
+                    return (
+                      <li key={item.sys.id} className="nav-item">
+                        <a href={fields.url} className="nav-link">
+                          {fields.label}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {navigationData.fields.cta && (
+                  <div className="d-grid d-md-block gap-2">
+                    <CTA cta={navigationData.fields.cta} />
+                  </div>
+                )}
+              </>
             )}
           </div>
 
