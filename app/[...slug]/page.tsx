@@ -1,20 +1,17 @@
 import { createClient, Entry, EntrySkeletonType } from 'contentful';
 import { notFound } from 'next/navigation';
 import ContentSection from '@/components/ContentSection';
+import { buildMetadataFromContentfulSeo } from '@/utils/seo';
+import { getBreadcrumbListJsonLd, getWebPageJsonLd } from '@/utils/structuredData';
 
 interface PageFields {
   title: string;
   slug: string;
   content: any[];
+  seoFields?: any;
   pageParent?: {
-    sys: {
-      type: string;
-      linkType: string;
-      id: string;
-    };
-    fields: {
-      slug: string;
-    };
+    sys: { type: string; linkType: string; id: string };
+    fields: { slug: string; title?: string };
   };
 }
 
@@ -27,6 +24,8 @@ interface PageContent {
   slug: string;
   content: any[];
   parentSlug?: string;
+  parentTitle?: string;
+  seoFields?: any;
 }
 
 const client = createClient({
@@ -47,6 +46,7 @@ export async function getPageContent(slug: string | string[]): Promise<PageConte
           title: homepage.fields.title,
           slug: 'home',
           content: Array.isArray(homepage.fields.content) ? homepage.fields.content : [],
+          seoFields: (homepage.fields as any).seoFields,
         };
       } catch (error) {
         notFound();
@@ -67,7 +67,9 @@ export async function getPageContent(slug: string | string[]): Promise<PageConte
           title: entry.fields.title,
           slug: entry.fields.slug,
           content: Array.isArray(entry.fields.content) ? entry.fields.content : [],
-          parentSlug: entry.fields?.pageParent?.fields?.slug
+          parentSlug: entry.fields?.pageParent?.fields?.slug,
+          parentTitle: entry.fields?.pageParent?.fields?.title,
+          seoFields: (entry.fields as any).seoFields,
         };
       } catch (error) {
         // Continue to next search method
@@ -80,7 +82,9 @@ export async function getPageContent(slug: string | string[]): Promise<PageConte
         title: directMatch.fields.title,
         slug: directMatch.fields.slug,
         content: Array.isArray(directMatch.fields.content) ? directMatch.fields.content : [],
-        parentSlug: directMatch.fields?.pageParent?.fields?.slug
+        parentSlug: directMatch.fields?.pageParent?.fields?.slug,
+        parentTitle: directMatch.fields?.pageParent?.fields?.title,
+        seoFields: (directMatch.fields as any).seoFields,
       };
     }
 
@@ -97,7 +101,9 @@ export async function getPageContent(slug: string | string[]): Promise<PageConte
         title: childMatch.fields.title,
         slug: childMatch.fields.slug,
         content: Array.isArray(childMatch.fields.content) ? childMatch.fields.content : [],
-        parentSlug: childMatch.fields?.pageParent?.fields?.slug
+        parentSlug: childMatch.fields?.pageParent?.fields?.slug,
+        parentTitle: childMatch.fields?.pageParent?.fields?.title,
+        seoFields: (childMatch.fields as any).seoFields,
       };
     }
 
@@ -142,10 +148,16 @@ export async function generateMetadata({ params }: { params: { slug: string[] } 
   try {
     const fullPath = params.slug.join('/');
     const page = await getPageContent(fullPath);
-    
-    return {
-      title: page.title,
-    };
+
+    const path = fullPath === 'home' ? '/' : `/${fullPath}`;
+    return buildMetadataFromContentfulSeo({
+      seoFields: page.seoFields,
+      fallback: {
+        title: page.title,
+        path,
+        type: 'website',
+      },
+    });
   } catch (error) {
     return {
       title: 'Page Not Found'
@@ -156,18 +168,57 @@ export async function generateMetadata({ params }: { params: { slug: string[] } 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+function buildBreadcrumbItems(
+  fullPath: string,
+  pageTitle: string,
+  parentSlug?: string,
+  parentTitle?: string
+): { name: string; path: string }[] {
+  const items: { name: string; path: string }[] = [{ name: 'Home', path: '/' }];
+  if (fullPath === 'home') return items;
+  if (parentSlug) {
+    items.push({ name: parentTitle ?? parentSlug, path: `/${parentSlug}` });
+  }
+  items.push({ name: pageTitle, path: `/${fullPath}` });
+  return items;
+}
+
 export default async function Page({ params }: { params: { slug: string[] } }) {
   try {
     const fullPath = params.slug.join('/');
     const page = await getPageContent(fullPath);
 
+    const breadcrumbItems = buildBreadcrumbItems(
+      fullPath,
+      page.title,
+      page.parentSlug,
+      page.parentTitle
+    );
+    const breadcrumbLd = getBreadcrumbListJsonLd(breadcrumbItems);
+    const pagePath = fullPath === 'home' ? '/' : `/${fullPath}`;
+    const webPageLd = getWebPageJsonLd({
+      name: page.title,
+      path: pagePath,
+      breadcrumbLd,
+    });
+
     return (
-      <main>
-        <h1 className="sr-only">{page.title}</h1>
-        {page.content?.map((section, index) => (
-          <ContentSection key={index} section={section} />
-        ))}
-      </main>
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageLd) }}
+        />
+        <main>
+          <h1 className="sr-only">{page.title}</h1>
+          {page.content?.map((section, index) => (
+            <ContentSection key={index} section={section} />
+          ))}
+        </main>
+      </>
     );
   } catch (error) {
     notFound();

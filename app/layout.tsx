@@ -1,4 +1,4 @@
-import { Inter, Roboto } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import Navigation from '../components/Navigation'
 import './external.scss'
 import './globals.scss'
@@ -7,12 +7,19 @@ import Script from 'next/script'
 import ClientLayout from '@/components/ClientLayout'
 import TermlyScriptLoader from '@/components/TermlyScriptLoader'
 import GoogleAnalyticsLoader from '@/components/GoogleAnalyticsLoader'
+import OrganizationStructuredData from '@/components/OrganizationStructuredData'
+import { getSiteBaseUrl } from '@/utils/seo'
 
 const inter = Inter({ subsets: ['latin'] })
+
+export const viewport = {
+  themeColor: '#ffffff',
+}
 
 export const metadata = {
   title: 'Check Mirrors',
   description: 'Check Mirrors - Professional Driving School',
+  metadataBase: getSiteBaseUrl() ?? undefined,
   icons: {
     icon: [
       { url: '/favicon/favicon.ico' },
@@ -29,7 +36,6 @@ export const metadata = {
       },
     ],
   },
-  themeColor: '#ffffff',
 }
 
 export default function RootLayout({
@@ -50,6 +56,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className} suppressHydrationWarning>
+        <OrganizationStructuredData />
         <GoogleAnalyticsLoader />
         <ClientLayout>
           <Navigation />

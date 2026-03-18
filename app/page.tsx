@@ -1,5 +1,7 @@
 import { createClient, Entry, EntrySkeletonType } from 'contentful';
 import ContentSection from '../components/ContentSection';
+import { buildMetadataFromContentfulSeo } from '@/utils/seo';
+import { getWebSiteJsonLd } from '@/utils/structuredData';
 
 interface PageContent {
   sys: {
@@ -18,68 +20,105 @@ interface PageContent {
   };
 }
 
-async function getHomepageContent() {
-  // Log environment variables for debugging
+async function getHomepageContent(): Promise<PageContent | null> {
   const spaceId = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID;
   const accessToken = process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN;
 
-  // Validate environment variables
-  if (!spaceId) {
-    throw new Error('NEXT_PUBLIC_CONTENTFUL_SPACE_ID is missing');
-  }
-  if (!accessToken) {
-    throw new Error('NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN is missing');
+  if (!spaceId || !accessToken) {
+    console.error('Contentful env missing');
+    return null;
   }
 
   try {
-    // Create Contentful client
     const client = createClient({
       space: spaceId,
       accessToken: accessToken,
     });
 
-    // Fetch the entry
-    const entry = await client.getEntry('3vrx9Ezv34q2B8pY0kjP25', { 
-      include: 3
+    const entry = await client.getEntry('3vrx9Ezv34q2B8pY0kjP25', {
+      include: 3,
     });
 
     return entry as unknown as PageContent;
   } catch (error) {
     console.error('Error in getHomepageContent:', error);
-    throw error;
+    return null;
   }
 }
 
+export async function generateMetadata() {
+  const pageContent = await getHomepageContent();
+
+  // If Contentful is unavailable, fall back to static metadata (never 500).
+  if (!pageContent) {
+    return {
+      title: 'Check Mirrors - School of Motoring',
+      description: 'Check Mirrors - Professional Driving School',
+      openGraph: {
+        title: 'Check Mirrors - School of Motoring',
+        description: 'Check Mirrors - Professional Driving School',
+        type: 'website',
+      },
+      twitter: {
+        card: 'summary_large_image' as const,
+        title: 'Check Mirrors - School of Motoring',
+        description: 'Check Mirrors - Professional Driving School',
+      },
+    };
+  }
+
+  const title = typeof pageContent.fields?.internalName === 'string'
+    ? pageContent.fields.internalName
+    : 'Home';
+
+  return buildMetadataFromContentfulSeo({
+    seoFields: pageContent.fields?.seoFields,
+    fallback: {
+      title,
+      path: '/',
+      type: 'website',
+    },
+  });
+}
+
 export default async function Home() {
-  try {
-    const pageContent = await getHomepageContent();
+  const pageContent = await getHomepageContent();
 
-    if (!pageContent) {
-      return <main>No content available</main>;
-    }
-
-    const content = pageContent.fields.content;
-    if (!content) {
-      return <main>No content found</main>;
-    }
-
-    // Convert single content item to array if needed
-    const contentArray = Array.isArray(content) ? content : [content];
-    
-    if (contentArray.length === 0) {
-      return <main>No content sections found</main>;
-    }
-    
+  if (!pageContent) {
     return (
+      <main className="container py-5">
+        <div className="alert alert-info">
+          Content is temporarily unavailable. Please try again later.
+        </div>
+      </main>
+    );
+  }
+
+  const content = pageContent.fields?.content;
+  if (!content) {
+    return <main>No content found</main>;
+  }
+
+  const contentArray = Array.isArray(content) ? content : [content];
+  if (contentArray.length === 0) {
+    return <main>No content sections found</main>;
+  }
+
+  const webSiteLd = getWebSiteJsonLd();
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteLd) }}
+      />
       <main>
         {contentArray.map((section, index) => (
-          <div key={section.sys.id || index} >
+          <div key={section?.sys?.id ?? index}>
             <ContentSection section={section} />
           </div>
         ))}
       </main>
-    );
-  } catch (error) {
-    return <main>Error loading content: {error instanceof Error ? error.message : 'Unknown error'}</main>;
-  }
+    </>
+  );
 } 

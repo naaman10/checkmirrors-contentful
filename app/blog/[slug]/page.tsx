@@ -7,6 +7,8 @@ import { getCloudinaryUrl, getImageDimensions } from '@/utils/cloudinary';
 import HeroBanner from '@/components/HeroBanner';
 import Feature from '@/components/Feature';
 import ListItem from '@/components/ListItem';
+import { buildMetadataFromContentfulSeo } from '@/utils/seo';
+import { getBlogPostingJsonLd, getBreadcrumbListJsonLd } from '@/utils/structuredData';
 
 interface BlogPost {
   sys: {
@@ -16,6 +18,8 @@ interface BlogPost {
     title: string;
     slug: string;
     publishedDate: string;
+    seoFields?: any;
+    excerpt?: string;
     author: {
       fields: {
         name: string;
@@ -72,6 +76,7 @@ async function getBlogPost(slug: string) {
       'fields.title',
       'fields.slug',
       'fields.publishedDate',
+      'fields.seoFields',
       'fields.author',
       'fields.featureImage',
       'fields.content'
@@ -84,6 +89,32 @@ async function getBlogPost(slug: string) {
 
 
   return response.items[0] as unknown as BlogPost;
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  try {
+    const post = await getBlogPost(params.slug);
+
+    const featuredImageUrl =
+      post.fields.featureImage?.fields?.image?.[0]?.secure_url ||
+      post.fields.featureImage?.fields?.image?.[0]?.url ||
+      post.fields.featureImage?.fields?.file?.url;
+
+    return buildMetadataFromContentfulSeo({
+      seoFields: post.fields.seoFields,
+      fallback: {
+        title: post.fields.title,
+        description: post.fields.excerpt,
+        path: `/blog/${post.fields.slug}`,
+        imageUrl: featuredImageUrl,
+        type: 'article',
+      },
+    });
+  } catch {
+    return {
+      title: 'Blog Post Not Found',
+    };
+  }
 }
 
 const options = {
@@ -260,8 +291,23 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       }
     };
 
+    const blogPostingLd = getBlogPostingJsonLd(post);
+    const breadcrumbLd = getBreadcrumbListJsonLd([
+      { name: 'Home', path: '/' },
+      { name: 'Blog', path: '/blog' },
+      { name: post.fields.title, path: `/blog/${post.fields.slug}` },
+    ]);
+
     return (
       <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        />
         <HeroBanner section={heroBannerSection} />
         <main className="container py-5">
           <article className="bg-white rounded shadow-sm p-4">
