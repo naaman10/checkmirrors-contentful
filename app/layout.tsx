@@ -5,9 +5,9 @@ import './globals.scss'
 import Footer from '@/components/Footer'
 import Script from 'next/script'
 import ClientLayout from '@/components/ClientLayout'
-import TermlyScriptLoader from '@/components/TermlyScriptLoader'
 import GoogleAnalyticsLoader from '@/components/GoogleAnalyticsLoader'
 import OrganizationStructuredData from '@/components/OrganizationStructuredData'
+import TermlyResourceBlocker from '@/components/TermlyResourceBlocker'
 import { getSiteBaseUrl } from '@/utils/seo'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -48,7 +48,6 @@ export default function RootLayout({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <TermlyScriptLoader />
         <Script
           src="https://kit.fontawesome.com/c26d8f910e.js"
           crossOrigin="anonymous"
@@ -56,6 +55,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className} suppressHydrationWarning>
+        <TermlyResourceBlocker />
         <OrganizationStructuredData />
         <GoogleAnalyticsLoader />
         <ClientLayout>
