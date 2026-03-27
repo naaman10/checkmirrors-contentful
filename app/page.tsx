@@ -3,6 +3,9 @@ import ContentSection from '../components/ContentSection';
 import { buildMetadataFromContentfulSeo } from '@/utils/seo';
 import { getWebSiteJsonLd } from '@/utils/structuredData';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface PageContent {
   sys: {
     id: string;
