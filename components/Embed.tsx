@@ -1,18 +1,33 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Entry, EntrySkeletonType, ChainModifiers } from 'contentful';
 
 interface EmbedProps {
   section: Entry<EntrySkeletonType, ChainModifiers>;
 }
 
-export default function Embed({ section }: EmbedProps) {
-  const [isMounted, setIsMounted] = useState(false);
+/**
+ * Scripts inserted via innerHTML are inert and never fetch external src.
+ * After parsing into the DOM, replace each <script> with a newly created element so the
+ * browser runs them. querySelectorAll covers nested wrappers (importNode clones do not
+ * execute inner scripts).
+ */
+function injectEmbeddableHtml(container: HTMLElement, html: string) {
+  container.innerHTML = html;
+  const toActivate = Array.from(container.querySelectorAll('script'));
+  for (const oldScript of toActivate) {
+    const script = document.createElement('script');
+    for (const { name, value } of Array.from(oldScript.attributes)) {
+      script.setAttribute(name, value);
+    }
+    script.textContent = oldScript.textContent;
+    oldScript.parentNode?.replaceChild(script, oldScript);
+  }
+}
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+export default function Embed({ section }: EmbedProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   if (!section?.fields) {
     console.warn('Invalid section data in Embed component');
@@ -24,24 +39,24 @@ export default function Embed({ section }: EmbedProps) {
     embedCode?: string;
   };
 
-  const html = useMemo(() => {
-    if (embedType !== 'script' || !embedCode) return null;
-    return embedCode;
-  }, [embedType, embedCode]);
+  const isScriptEmbed =
+    typeof embedType === 'string' && embedType.trim().toLowerCase() === 'script';
 
-  if (embedType === 'script' && embedCode) {
-    // Third-party embed scripts often mutate DOM differently client-side,
-    // which causes hydration mismatches if rendered during SSR.
-    // Render a stable placeholder on the server, then inject HTML after mount.
-    if (!isMounted) {
-      return <div className="embed-container" suppressHydrationWarning />;
-    }
+  useEffect(() => {
+    if (!isScriptEmbed || !embedCode || !containerRef.current) return;
+    const el = containerRef.current;
+    injectEmbeddableHtml(el, embedCode);
+    return () => {
+      el.innerHTML = '';
+    };
+  }, [isScriptEmbed, embedCode]);
 
+  if (isScriptEmbed && embedCode) {
     return (
-      <div 
-        className="embed-container" 
+      <div
+        ref={containerRef}
+        className="embed-container"
         suppressHydrationWarning
-        dangerouslySetInnerHTML={{ __html: html || '' }}
       />
     );
   }
