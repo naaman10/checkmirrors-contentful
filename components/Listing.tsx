@@ -176,11 +176,16 @@ export default function Listing({
     return items;
   }, [items, normalizedContentType, filter, selectedTags, selectedCategories]);
 
+  const isPaginationEnabled = Boolean(pagination?.enabled);
   const itemsPerPage = pagination?.itemsPerPage || 6;
-  const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage);
+  const totalPages = isPaginationEnabled
+    ? Math.ceil((filteredItems?.length || 0) / itemsPerPage)
+    : 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentItems = filteredItems?.slice(startIndex, endIndex) || [];
+  const currentItems = isPaginationEnabled
+    ? filteredItems?.slice(startIndex, endIndex) || []
+    : filteredItems || [];
 
   const handleTagToggle = (tag: string) => {
     setSelectedTags(prev => 
@@ -241,97 +246,104 @@ export default function Listing({
             {subTitle}
           </p>
         )}
-        <div className="row">
-          {filter && (
-            <div className="col-12 col-md-3 mb-4 mb-md-0">
+        {filter && (allTags.length > 0 || allCategories.length > 0) && (
+          <div className="row mb-4">
+            <div className="col-12">
               <div className="card">
                 <div className="card-body">
-                  <h5 className="card-title">Filter by</h5>
-                  <div className="d-flex flex-column gap-3">
-                    {/* Instructor Tags Filter */}
-                    {(normalizedContentType === 'instructor' || normalizedContentType === 'instructors') && 
-                     allTags.length > 0 && allTags.map(({ tag, count }) => (
-                      <div key={tag} className="form-check form-switch">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          role="switch"
-                          id={`filter-${tag}`}
-                          checked={selectedTags.includes(tag)}
-                          onChange={() => handleTagToggle(tag)}
-                        />
-                        <label className="form-check-label" htmlFor={`filter-${tag}`}>
-                          {tag} <span className="text-muted">({count})</span>
-                        </label>
+                  <h5 className="card-title mb-3">Filter by</h5>
+
+                  {(normalizedContentType === 'instructor' || normalizedContentType === 'instructors') && allTags.length > 0 && (
+                    <div className="mb-3">
+                      <div className="d-flex flex-wrap gap-3">
+                        {allTags.map(({ tag, count }) => (
+                          <div key={tag} className="form-check form-switch">
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              role="switch"
+                              id={`filter-${tag}`}
+                              checked={selectedTags.includes(tag)}
+                              onChange={() => handleTagToggle(tag)}
+                            />
+                            <label className="form-check-label" htmlFor={`filter-${tag}`}>
+                              {tag} <span className="text-muted">({count})</span>
+                            </label>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                    
-                    {/* Article Categories Filter */}
-                    {(normalizedContentType === 'blog' || normalizedContentType === 'blogs' || 
-                      normalizedContentType === 'article' || normalizedContentType === 'articles') && 
-                     allCategories.length > 0 && allCategories.map(({ category, count }) => (
-                      <div key={category} className="form-check form-switch">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          role="switch"
-                          id={`filter-${category}`}
-                          checked={selectedCategories.includes(category)}
-                          onChange={() => handleCategoryToggle(category)}
-                        />
-                        <label className="form-check-label" htmlFor={`filter-${category}`}>
-                          {category} <span className="text-muted">({count})</span>
-                        </label>
+                    </div>
+                  )}
+
+                  {(normalizedContentType === 'blog' || normalizedContentType === 'blogs' ||
+                    normalizedContentType === 'article' || normalizedContentType === 'articles') && allCategories.length > 0 && (
+                    <div>
+                      <h6 className="mb-2">Categories</h6>
+                      <div className="d-flex flex-wrap gap-3">
+                        {allCategories.map(({ category, count }) => (
+                          <div key={category} className="form-check form-switch">
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              role="switch"
+                              id={`filter-${category}`}
+                              checked={selectedCategories.includes(category)}
+                              onChange={() => handleCategoryToggle(category)}
+                            />
+                            <label className="form-check-label" htmlFor={`filter-${category}`}>
+                              {category} <span className="text-muted">({count})</span>
+                            </label>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          )}
-          <div className={`${filter && (allTags.length > 0 || allCategories.length > 0) ? 'col-12 col-md-9' : 'col-12'}`}>
-            <div className="row g-4">
-              {currentItems.map((item, index) => (
-                <div key={item.sys.id} className={getColumnClass()}>
-                  <div className="card h-100">
-                    <Card item={item} contentType={normalizedContentType} columns={columns} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            {pagination?.enabled && totalPages > 1 && (
-              <div className="d-flex justify-content-center mt-4">
-                <nav aria-label="Page navigation">
-                  <ul className="pagination">
-                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                      <button
-                        className="page-link"
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                      >
-                        Previous
-                      </button>
-                    </li>
-                    <li className="page-item">
-                      <span className="page-link">
-                        Page {currentPage} of {totalPages}
-                      </span>
-                    </li>
-                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                      <button
-                        className="page-link"
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                      >
-                        Next
-                      </button>
-                    </li>
-                  </ul>
-                </nav>
-              </div>
-            )}
           </div>
+        )}
+
+        <div className="row g-4">
+          {currentItems.map((item) => (
+            <div key={item.sys.id} className={getColumnClass()}>
+              <div className="card h-100">
+                <Card item={item} contentType={normalizedContentType} columns={columns} />
+              </div>
+            </div>
+          ))}
         </div>
+        {isPaginationEnabled && totalPages > 1 && (
+          <div className="d-flex justify-content-center mt-4">
+            <nav aria-label="Page navigation">
+              <ul className="pagination">
+                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                  <button
+                    className="page-link"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                </li>
+                <li className="page-item">
+                  <span className="page-link">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                </li>
+                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                  <button
+                    className="page-link"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        )}
       </div>
     </section>
   )
