@@ -36,7 +36,9 @@ export default function Footer() {
           <div className="col-8 text-center">
             <p>Copyright © checkmirrors 2025</p>
             <p>checkmirrors is a trading name of Checkmirrors Ltd.</p>
-            <a href="#" className="termly-display-preferences">Consent Preferences</a>
+            <a href="#" className="termly-display-preferences me-3">Consent Preferences</a>
+            <a href="https://res.cloudinary.com/njh101010/image/upload/v1782812235/checkmirrors/documents/Checkmirrors_terms_and_conditions_May_2026.pdf" target="_blank">Terms & Conditions</a>
+       
             <p>Driving instructors associated with Checkmirrors Ltd are independent self-employed professionals. Checkmirrors Ltd is not liable for any transactions, agreements, or disputes between driving instructors and pupils. All dealings are solely the responsibility of the parties involved.</p>
           </div>
         </div>
